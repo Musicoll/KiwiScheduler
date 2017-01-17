@@ -58,8 +58,9 @@ namespace kiwi
         //! @details The scheduler manages a set of taks for one consumer and one producer. It
         //! means that only one thread can add the tasks and only one tread can consume the
         //! tasks.
-        //! @todo For the moment remove with the remove method isn't lock free (but it is within
-        //! the add method).
+        //! @todo For the moment removing a task with the remove method isn't lock free (but it is
+        //! within the add method). Perhaps we should create a lock free version of it, it would
+        //! also simplify the add method.
         class Scheduler
         {
         public:
