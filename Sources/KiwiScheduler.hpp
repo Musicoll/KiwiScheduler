@@ -70,7 +70,7 @@ namespace kiwi
             //! @brief Adds a task to the scheduler.
             //! @details Only one instance of a task can be added to the scheduler because the
             //! task owns its time point, so if the scheduler owns two instances of the same
-            //! task one of these instances won't have the right time. Therefore, the taks is
+            //! task one of these instances won't have the right time. Therefore, the task is
             //! removed from the list if it has already been added and not consumed.
             //! @param t    The task to add.
             //! @param time The time point where the task should be inserted.
