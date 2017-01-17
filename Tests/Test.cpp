@@ -52,7 +52,7 @@ TEST_CASE("Scheduler", "[Scheduler]")
     Task t4(printo);
     Task t5(printo);
     Scheduler sch;
-    
+    counter = 0;
     sch.add(t1, clock::now() + milliseconds(40));
     sch.add(t2, clock::now() + milliseconds(20));
     sch.add(t3, clock::now() + milliseconds(70));
@@ -60,22 +60,11 @@ TEST_CASE("Scheduler", "[Scheduler]")
     sch.add(t5, clock::now() + milliseconds(50));
     sch.add(t5, clock::now() + milliseconds(60));
     
-    while (counter < 40)
+    while (counter < 4)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         sch.perform(clock::now());
         sch.add(t1, clock::now() + milliseconds(15));
-    }
-    
-    
-    SECTION("Chain Result Valid")
-    {
-        
-    }
-    
-    SECTION("Chain Result Invalid")
-    {
-        
     }
 }
 

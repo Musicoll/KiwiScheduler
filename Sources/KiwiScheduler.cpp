@@ -105,6 +105,7 @@ namespace kiwi
                     {
                         t.m_next = m_main;
                         m_main   = &t;
+                        m_main_mutex.unlock();
                         return;
                     }
                     Task *previous = m_main;
@@ -115,6 +116,7 @@ namespace kiwi
                         {
                             t.m_next = current;
                             previous->m_next = &t;
+                            m_main_mutex.unlock();
                             return;
                         }
                         previous = current;
@@ -126,13 +128,14 @@ namespace kiwi
                 {
                     m_main = &t;
                 }
+                m_main_mutex.unlock();
             }
             // Adds to task the futur list
             else
             {
                 t.m_time = time;
                 t.m_next = m_futur;
-                std::lock_guard<std::mutex> lock(m_main_mutex);
+                std::lock_guard<std::mutex> lock(m_futur_mutex);
                 m_futur = &t;
             }
         }
