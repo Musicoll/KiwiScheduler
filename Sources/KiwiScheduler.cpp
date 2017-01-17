@@ -29,6 +29,11 @@ namespace kiwi
             
         }
         
+        Scheduler::~Scheduler()
+        {
+            
+        }
+        
         void Scheduler::perform(time_point_t const time)
         {
             // Retrieves the tasks to perform

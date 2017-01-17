@@ -56,18 +56,28 @@ namespace kiwi
         // ==================================================================================== //
         //! @brief The container for a set of tasks.
         //! @details The scheduler manages a set of taks for one consumer and one producer. It
-        //! means that only one thread can add the tasks and onyl one tread can consume the
+        //! means that only one thread can add the tasks and only one tread can consume the
         //! tasks.
+        //! @todo For the moment remove with the remove method isn't lock free (but it is within
+        //! the add method).
         class Scheduler
         {
         public:
             using time_point_t = Task::time_point_t;
             
+            //! @brief the constructor.
             Scheduler();
             
+            //! @brief the destructor.
+            ~Scheduler();
+            
+            //! @brief Performs the tasks until the specified time.
+            //! @details The method calls all the task before the specified time and then adds
+            //! tasks that could have been added during this operation.
+            //! @param time The time point.
             void perform(time_point_t const time);
             
-            //! @brief Adds a task to the scheduler.
+            //! @brief Adds a task at a specified time.
             //! @details Only one instance of a task can be added to the scheduler because the
             //! task owns its time point, so if the scheduler owns two instances of the same
             //! task one of these instances won't have the right time. Therefore, the task is
@@ -76,11 +86,14 @@ namespace kiwi
             //! @param time The time point where the task should be inserted.
             void add(Task& t, time_point_t const time);
             
+            //! @brief Removes a task.
+            //! @details Removing a task is not lock free.
+            //! @param t The task to remove.
             void remove(Task const& t);
             
         private:
-            Task*           m_main; //! The sorted linked list of tasks.
-            Task*           m_futur; //! The linked list of tasks to will be inserted.
+            Task*           m_main;         //! The main sorted linked list of tasks.
+            Task*           m_futur;        //! The linked list of tasks that will be inserted.
             std::mutex      m_main_mutex;
             std::mutex      m_futur_mutex;
         };
