@@ -79,10 +79,10 @@ namespace kiwi
             void remove(Task const& t);
             
         private:
-            Task*           m_sorted; //! The sorted linked list of tasks.
-            Task*           m_waited; //! The linked list of tasks to will be inserted.
-            std::mutex      m_sorted_mutex;
-            std::mutex      m_waited_mutex;
+            Task*           m_main; //! The sorted linked list of tasks.
+            Task*           m_futur; //! The linked list of tasks to will be inserted.
+            std::mutex      m_main_mutex;
+            std::mutex      m_futur_mutex;
         };
     }
 }
