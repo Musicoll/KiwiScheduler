@@ -2,7 +2,6 @@
  ==============================================================================
  
  This file is part of the KIWI library.
- - Copyright (c) 2014-2016, Pierre Guillot & Eliott Paris.
  - Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
  
  Permission is granted to use this software under the terms of the GPL v2
@@ -34,7 +33,7 @@ namespace kiwi
         //                                      TASK                                        //
         // ================================================================================ //
         //! @brief The task that can be added to a scheduler.
-        //! @details A task describes ...
+        //! @details Perhaps we should manage a pointer to pass to the method...
         class Task
         {
         public:
@@ -82,7 +81,8 @@ namespace kiwi
         private:
             Task*           m_sorted; //! The sorted linked list of tasks.
             Task*           m_waited; //! The linked list of tasks to will be inserted.
-            std::mutex      m_mutex;
+            std::mutex      m_sorted_mutex;
+            std::mutex      m_waited_mutex;
         };
     }
 }

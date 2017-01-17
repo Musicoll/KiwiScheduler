@@ -2,7 +2,6 @@
  ==============================================================================
  
  This file is part of the KIWI library.
- - Copyright (c) 2014-2016, Pierre Guillot & Eliott Paris.
  - Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
  
  Permission is granted to use this software under the terms of the GPL v2
@@ -32,9 +31,10 @@ namespace kiwi
         
         void Scheduler::perform(time_point_t const time)
         {
+            // Retrieves the tasks to perform
             Task *head = nullptr;
             {
-                std::lock_guard<std::mutex> lock(m_mutex);
+                std::lock_guard<std::mutex> lock(m_sorted_mutex);
                 Task *current = m_sorted, *previous = nullptr;
                 while(current && current->m_time <= time)
                 {
@@ -49,7 +49,7 @@ namespace kiwi
                 }
             }
             
-            // Calls the methods
+            // Performs the tasks
             while(head)
             {
                 head->m_method();
@@ -57,23 +57,29 @@ namespace kiwi
             }
             
             // Adds the tasks that wait to the list
-            while(m_waited)
             {
-                Task *next = m_waited->m_next;
-                add(*m_waited, m_waited->m_time);
-                m_waited = next;
+                m_waited_mutex.lock();
+                while(m_waited)
+                {
+                    Task *current = m_waited;
+                    m_waited = m_waited->m_next;
+                    m_waited_mutex.unlock();
+                    add(*current, current->m_time);
+                    m_waited_mutex.lock();
+                }
+                m_waited_mutex.unlock();
             }
+            
         }
         
         void Scheduler::add(Task& t, time_point_t const time)
         {
-            t.m_time = time;
-            t.m_next = nullptr;
-            if(m_mutex.try_lock())
+            // If we're not performing on the main list
+            if(m_sorted_mutex.try_lock())
             {
                 if(m_sorted)
                 {
-                    // First remove if the task already exists
+                    // First remove the task if the task is already in the main list
                     if(m_sorted == &t)
                     {
                         m_sorted = m_sorted->m_next;
@@ -93,7 +99,8 @@ namespace kiwi
                         }
                     }
                     
-                    
+                    // Then add the task to the main list
+                    t.m_time = time;
                     if(m_sorted->m_time >= t.m_time)
                     {
                         t.m_next = m_sorted;
@@ -120,10 +127,12 @@ namespace kiwi
                     m_sorted = &t;
                 }
             }
+            // Adds to task the futur list
             else
             {
-                // dois y avoir une autre lock ici
+                t.m_time = time;
                 t.m_next = m_waited;
+                std::lock_guard<std::mutex> lock(m_sorted_mutex);
                 m_waited = &t;
             }
         }
@@ -132,7 +141,7 @@ namespace kiwi
         {
             if(m_sorted)
             {
-                std::lock_guard<std::mutex> lock(m_mutex);
+                std::lock_guard<std::mutex> lock(m_sorted_mutex);
                 if(m_sorted == &t)
                 {
                     m_sorted = m_sorted->m_next;
