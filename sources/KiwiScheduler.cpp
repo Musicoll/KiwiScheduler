@@ -42,40 +42,51 @@ namespace kiwi
         
         void Scheduler::perform(time_point_t const time)
         {
-            Task *head = nullptr;
-            // Retrieves the tasks to perform
+            // The list of tasks to perform before the given time
+            Task *ready = nullptr;
+            
+            // ------------------------------------------//
+            // Retrieves the tasks before the given time //
+            // ------------------------------------------//
             {
+                // Locks the mutex of the main list of tasks. If tasks are added or removed
+                // during this lock, they will be added to the future list and processed after
                 std::lock_guard<std::mutex> lock(m_main_mutex);
-                Task *current = m_main, *previous = nullptr;
-                while(current && current->m_time <= time)
+                
+                // Finds the tail of the list to perform now and the head of the new list
+                Task *head = m_main, *tail = nullptr;
+                while(head && head->m_time <= time)
                 {
-                    previous = current;
-                    current  = current->m_next;
+                    tail = head;
+                    head  = head->m_next;
                 }
-                if(previous)
+                // If the tail of the list to perform isn't null:
+                // • The head of the tasks to perform now is the current head of the main list
+                // • The new head of the tasks is the next task of the tail
+                // • The next task of the tail will be null to mark the end
+                if(tail)
                 {
-                    previous->m_next = nullptr;
-                    head             = m_main;
-                    m_main           = current;
+                    tail->m_next = nullptr;
+                    ready        = m_main;
+                    m_main       = head;
                 }
             }
             
-            // Performs the tasks
-            while(head)
+            // ------------------------------------------//
+            // Adds and removes the tasks that has been  //
+            // added or removed during the main lock     //
+            // ------------------------------------------//
             {
-                head->m_method();
-                head = head->m_next;
-            }
-            
-            // Adds the tasks that wait to the list
-            {
+                // Locks the mutex of the list of futures tasks. If tasks are added or removed
+                // during this lock, they managed directly by the main list or recursively
+                // added to this list until the main lock is free.
                 m_futur_mutex.lock();
                 while(m_futur)
                 {
                     Task *current = m_futur;
                     m_futur = m_futur->m_futur_next;
                     m_futur_mutex.unlock();
-                    if(current->m_futur_time != time_point_t::min())
+                    if(current->m_futur_type == Task::futur_type_t::to_add)
                     {
                         add(*current, current->m_futur_time);
                     }
@@ -88,6 +99,17 @@ namespace kiwi
                 m_futur_mutex.unlock();
             }
             
+            
+            
+            // ------------------------------------------//
+            // Performs the tasks                        //
+            // ------------------------------------------//
+            // As we don't touch the task, we can call it without locks
+            while(ready)
+            {
+                ready->m_method();
+                ready = ready->m_next;
+            }
         }
         
         void Scheduler::add(Task& t, time_point_t const time)
@@ -165,6 +187,7 @@ namespace kiwi
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
                 t.m_futur_time = time;
                 t.m_futur_next = m_futur;
+                t.m_futur_type = Task::futur_type_t::to_add;
                 m_futur = &t;
             }
         }
@@ -204,6 +227,7 @@ namespace kiwi
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
                 t.m_futur_time = time_point_t::min();
                 t.m_futur_next = m_futur;
+                t.m_futur_type = Task::futur_type_t::to_remove;
                 m_futur = &t;
             }
         }
