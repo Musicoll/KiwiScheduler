@@ -42,9 +42,9 @@ namespace kiwi
         
         void Scheduler::perform(time_point_t const time)
         {
+            Task *head = nullptr;
             // Retrieves the tasks to perform
             {
-                Task *head = nullptr;
                 std::lock_guard<std::mutex> lock(m_main_mutex);
                 Task *current = m_main, *previous = nullptr;
                 while(current && current->m_time <= time)
@@ -57,18 +57,15 @@ namespace kiwi
                     previous->m_next = nullptr;
                     head             = m_main;
                     m_main           = current;
-                    
-                    // Performs the tasks
-                    while(head)
-                    {
-                        Task *current = head;
-                        current->m_method();
-                        head = current->m_next;
-                        current->m_next = nullptr;
-                    }
                 }
             }
             
+            // Performs the tasks
+            while(head)
+            {
+                head->m_method();
+                head = head->m_next;
+            }
             
             // Adds the tasks that wait to the list
             {
