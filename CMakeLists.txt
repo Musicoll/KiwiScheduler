@@ -24,13 +24,13 @@ elseif(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 endif()
 
-file(GLOB KIWI_SCHEDULER_SOURCES ${PROJECT_SOURCE_DIR}/Sources/*.cpp ${PROJECT_SOURCE_DIR}/Sources/*.hpp)
+file(GLOB KIWI_SCHEDULER_SOURCES ${PROJECT_SOURCE_DIR}/sources/*.cpp ${PROJECT_SOURCE_DIR}/sources/*.hpp)
 source_group(KiwiScheduler FILES ${KIWI_SCHEDULER_SOURCES})
-include_directories(${PROJECT_SOURCE_DIR}/Sources)
+include_directories(${PROJECT_SOURCE_DIR}/sources)
 
-file(GLOB KIWI_SCHEDULER_TESTS ${PROJECT_SOURCE_DIR}/Tests/*.cpp ${PROJECT_SOURCE_DIR}/Tests/*.hpp)
+file(GLOB KIWI_SCHEDULER_TESTS ${PROJECT_SOURCE_DIR}/tests/*.cpp ${PROJECT_SOURCE_DIR}/tests/*.hpp)
 source_group(Tests FILES ${KIWI_SCHEDULER_TESTS})
-include_directories(${PROJECT_SOURCE_DIR}/Tests)
+include_directories(${PROJECT_SOURCE_DIR}/tests)
 
 add_executable(KiwiSchedulerTest ${KIWI_SCHEDULER_SOURCES} ${KIWI_SCHEDULER_TESTS})
 
