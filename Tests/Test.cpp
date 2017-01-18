@@ -23,53 +23,81 @@
 
 // Catch main function
 
-#define CATCH_CONFIG_RUNNER
-#include "catch.hpp"
+//#define CATCH_CONFIG_RUNNER
+//#include "catch.hpp"
 
 #include <KiwiScheduler.hpp>
 
 #include <thread>
 #include <atomic>
 #include <cstdlib>
+#include <vector>
 
 using namespace kiwi::scheduler;
+#define MAX_COUNT 128
+static std::atomic<size_t> counter;
 
-static int counter = 0;
-
-static void printo()
+static void increment()
 {
-    std::cout << "zaza "<< counter++ <<"\n";
+    counter++;
 }
 
-TEST_CASE("Scheduler", "[Scheduler]")
+static void producer(Scheduler* sch)
 {
-    using milliseconds = std::chrono::milliseconds;
+    size_t index = 0;
+    std::vector<Task> tasks(MAX_COUNT, Task(increment));
+    using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
-    
-    Task t1(printo);
-    Task t2(printo);
-    Task t3(printo);
-    Task t4(printo);
-    Task t5(printo);
-    Scheduler sch;
-    counter = 0;
-    sch.add(t1, clock::now() + milliseconds(40));
-    sch.add(t2, clock::now() + milliseconds(20));
-    sch.add(t3, clock::now() + milliseconds(70));
-    sch.add(t4, clock::now() + milliseconds(80));
-    sch.add(t5, clock::now() + milliseconds(50));
-    sch.add(t5, clock::now() + milliseconds(60));
-    
-    while (counter < 4)
+    while(counter < MAX_COUNT)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        sch.perform(clock::now());
-        sch.add(t1, clock::now() + milliseconds(15));
+        std::this_thread::sleep_for(ms(10));
+        if(index%2)
+        {
+            sch->add(tasks[index], clock::now() + ms(5));
+        }
+        else
+        {
+            sch->add(tasks[index], clock::now() + ms(17));
+        }
+        index = (index + 1) % MAX_COUNT;
+    }
+}
+
+static void consumer(Scheduler* sch)
+{
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::high_resolution_clock;
+    while(counter < MAX_COUNT)
+    {
+        std::this_thread::sleep_for(ms(20));
+        sch->perform(clock::now());
     }
 }
 
 int main( int argc, char* const argv[] )
 {
-    std::cout << "Unit-Tests - KiwiScheduler ..." << '\n';
-    return Catch::Session().run( argc, argv );
+    std::cout << "Unit-Tests - KiwiScheduler ...\n";
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::high_resolution_clock;
+    counter = 0;
+    Scheduler sch;
+    Task t1(increment);
+    Task t2(increment);
+    Task t3(increment);
+    Task t4(increment);
+    Task t5(increment);
+    
+    sch.add(t1, clock::now() + ms(40));
+    sch.add(t2, clock::now() + ms(20));
+    sch.add(t3, clock::now() + ms(70));
+    sch.add(t4, clock::now() + ms(80));
+    sch.add(t5, clock::now() + ms(50));
+    sch.add(t5, clock::now() + ms(60));
+    
+    std::thread prod(producer, &sch);
+    std::thread cons(consumer, &sch);
+    cons.join();
+    prod.join();
+    
+    return 0;
 }

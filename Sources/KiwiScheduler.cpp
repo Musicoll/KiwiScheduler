@@ -24,7 +24,13 @@ namespace kiwi
 {
     namespace scheduler
     {
-        Scheduler::Scheduler() : m_main(nullptr)
+        Task::Task(method_t&& m) : m_next(nullptr), m_time(), m_futur_next(nullptr), m_futur_time(), m_method(m)
+        {
+            
+        }
+        
+        
+        Scheduler::Scheduler() : m_main(nullptr), m_futur(nullptr)
         {
             
         }
@@ -37,8 +43,8 @@ namespace kiwi
         void Scheduler::perform(time_point_t const time)
         {
             // Retrieves the tasks to perform
-            Task *head = nullptr;
             {
+                Task *head = nullptr;
                 std::lock_guard<std::mutex> lock(m_main_mutex);
                 Task *current = m_main, *previous = nullptr;
                 while(current && current->m_time <= time)
@@ -51,15 +57,18 @@ namespace kiwi
                     previous->m_next = nullptr;
                     head             = m_main;
                     m_main           = current;
+                    
+                    // Performs the tasks
+                    while(head)
+                    {
+                        Task *current = head;
+                        current->m_method();
+                        head = current->m_next;
+                        current->m_next = nullptr;
+                    }
                 }
             }
             
-            // Performs the tasks
-            while(head)
-            {
-                head->m_method();
-                head = head->m_next;
-            }
             
             // Adds the tasks that wait to the list
             {
@@ -67,9 +76,16 @@ namespace kiwi
                 while(m_futur)
                 {
                     Task *current = m_futur;
-                    m_futur = m_futur->m_next;
+                    m_futur = m_futur->m_futur_next;
                     m_futur_mutex.unlock();
-                    add(*current, current->m_time);
+                    if(current->m_futur_time != time_point_t::min())
+                    {
+                        add(*current, current->m_futur_time);
+                    }
+                    else
+                    {
+                        remove(*current);
+                    }
                     m_futur_mutex.lock();
                 }
                 m_futur_mutex.unlock();
@@ -82,12 +98,14 @@ namespace kiwi
             // If we're not performing on the main list
             if(m_main_mutex.try_lock())
             {
+                t.m_time = time;
                 if(m_main)
                 {
                     // First remove the task if the task is already in the main list
                     if(m_main == &t)
                     {
-                        m_main = m_main->m_next;
+                        m_main = t.m_next;
+                        t.m_next = nullptr;
                     }
                     else
                     {
@@ -97,77 +115,99 @@ namespace kiwi
                             if(current == &t)
                             {
                                 previous->m_next = current->m_next;
+                                current->m_next = nullptr;
                                 break;
                             }
                             previous = current;
                             current = current->m_next;
                         }
                     }
-                    
                     // Then add the task to the main list
-                    t.m_time = time;
-                    if(m_main->m_time >= t.m_time)
+                    if(m_main)
                     {
-                        t.m_next = m_main;
-                        m_main   = &t;
-                        m_main_mutex.unlock();
-                        return;
-                    }
-                    Task *previous = m_main;
-                    Task *current = previous->m_next;
-                    while(current)
-                    {
-                        if(current->m_time >= t.m_time)
+                        if(m_main->m_time > t.m_time)
                         {
-                            t.m_next = current;
-                            previous->m_next = &t;
+                            t.m_next = m_main;
+                            m_main   = &t;
                             m_main_mutex.unlock();
                             return;
                         }
-                        previous = current;
-                        current = current->m_next;
+                        Task *previous = m_main;
+                        Task *current = previous->m_next;
+                        while(current)
+                        {
+                            if(current->m_time > t.m_time)
+                            {
+                                t.m_next = current;
+                                previous->m_next = &t;
+                                m_main_mutex.unlock();
+                                return;
+                            }
+                            previous = current;
+                            current = current->m_next;
+                        }
+                        previous->m_next = &t;
+                        t.m_next = nullptr;
                     }
-                    previous->m_next = &t;
+                    else
+                    {
+                        m_main = &t;
+                        t.m_next = nullptr;
+                    }
                 }
                 else
                 {
                     m_main = &t;
+                    t.m_next = nullptr;
                 }
                 m_main_mutex.unlock();
             }
             // Adds to task the futur list
             else
             {
-                t.m_time = time;
-                t.m_next = m_futur;
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
+                t.m_futur_time = time;
+                t.m_futur_next = m_futur;
                 m_futur = &t;
             }
         }
         
-        void Scheduler::remove(Task const& t)
+        void Scheduler::remove(Task& t)
         {
-            if(m_main)
+            if(m_main_mutex.try_lock())
             {
-                std::lock_guard<std::mutex> lock(m_main_mutex);
-                if(m_main == &t)
+                if(m_main)
                 {
-                    m_main = m_main->m_next;
-                }
-                else
-                {
-                    Task *current = m_main->m_next, *previous = m_main;
-                    while(current)
+                    if(m_main == &t)
                     {
-                        if(current == &t)
+                        m_main = t.m_next;
+                        t.m_next = nullptr;
+                    }
+                    else
+                    {
+                        Task *current = m_main->m_next, *previous = m_main;
+                        while(current)
                         {
-                            previous->m_next = current->m_next;
-                            return;
+                            if(current == &t)
+                            {
+                                previous->m_next = current->m_next;
+                                current->m_next = nullptr;
+                                m_main_mutex.unlock();
+                                return;
+                            }
+                            previous = current;
+                            current = current->m_next;
                         }
-                        previous = current;
-                        current = current->m_next;
                     }
                 }
+                m_main_mutex.unlock();
+            }
+            else
+            {
+                std::lock_guard<std::mutex> lock(m_futur_mutex);
+                t.m_futur_time = time_point_t::min();
+                t.m_futur_next = m_futur;
+                m_futur = &t;
             }
         }
     }

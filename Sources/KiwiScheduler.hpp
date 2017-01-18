@@ -40,12 +40,16 @@ namespace kiwi
             using method_t          = std::function<void()>;
             using time_point_t      = std::chrono::high_resolution_clock::time_point;
 
-            Task(method_t&& m) : m_next(nullptr), m_method(m), m_time() {}
+            //! @brief the constructor.
+            //! @param m The method to call.
+            Task(method_t&& m);
             
         private:
-            Task*           m_next;
-            method_t        m_method;
-            time_point_t    m_time;
+            Task*           m_next;         //! The next task in the scheduler.
+            time_point_t    m_time;         //! The current time of the task.
+            Task*           m_futur_next;   //! The futur next task in the scheduler.
+            time_point_t    m_futur_time;   //! The futur time if it waits for the insertion.
+            method_t        m_method;       //! The method to call.
             
             friend class Scheduler;
         };
@@ -56,20 +60,19 @@ namespace kiwi
         // ==================================================================================== //
         //! @brief The container for a set of tasks.
         //! @details The scheduler manages a set of taks for one consumer and one producer. It
-        //! means that only one thread can add the tasks and only one tread can consume the
-        //! tasks.
-        //! @todo For the moment removing a task with the remove method isn't lock free (but it is
-        //! within the add method). Perhaps we should create a lock free version of it, it would
-        //! also simplify the add method.
+        //! means that only one thread can add or remove the tasks and only one tread can
+        //! consume the tasks. If only one thread can add or remove a task, it means that
+        //! these two methods can only be called sequentially but the perform method can be
+        //! called in concurence.
         class Scheduler
         {
         public:
             using time_point_t = Task::time_point_t;
             
-            //! @brief the constructor.
+            //! @brief The constructor.
             Scheduler();
             
-            //! @brief the destructor.
+            //! @brief The destructor.
             ~Scheduler();
             
             //! @brief Performs the tasks until the specified time.
@@ -88,15 +91,16 @@ namespace kiwi
             void add(Task& t, time_point_t const time);
             
             //! @brief Removes a task.
-            //! @details Removing a task is not lock free.
+            //! @details This method is also lock free but for lock reasons, the method can't
+            //! be used by the add method.
             //! @param t The task to remove.
-            void remove(Task const& t);
+            void remove(Task& t);
             
         private:
             Task*           m_main;         //! The main sorted linked list of tasks.
             Task*           m_futur;        //! The linked list of tasks that will be inserted.
-            std::mutex      m_main_mutex;
-            std::mutex      m_futur_mutex;
+            std::mutex      m_main_mutex;   //! The main list mutex.
+            std::mutex      m_futur_mutex;  //! The futur list mutex.
         };
     }
 }
