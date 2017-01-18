@@ -24,8 +24,40 @@
 #include "TestScheduler.hpp"
 using namespace kiwi::scheduler;
 
-extern int perform_test2()
+static std::atomic<size_t> counter;
+static void increment()
 {
+    counter++;
+}
 
-    return 0;
+extern int perform_test3()
+{
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::high_resolution_clock;
+    
+    counter = 0;
+    Scheduler sch;
+    
+    Task t1(increment);
+    Task t2(increment);
+    Task t3(increment);
+    Task t4(increment);
+    Task t5(increment);
+    Task t6(increment);
+    
+    sch.add(t1, clock::now() + ms(40));
+    sch.add(t2, clock::now() + ms(20));
+    sch.add(t3, clock::now() + ms(70));
+    sch.add(t4, clock::now() + ms(80));
+    sch.add(t5, clock::now() + ms(50));
+    sch.add(t5, clock::now() + ms(60));
+    sch.add(t1, clock::now() + ms(40));
+    sch.add(t6, clock::now() + ms(30));
+    
+    sch.perform(clock::now() + ms(40));
+    sch.add(t2, clock::now() + ms(20));
+    sch.add(t6, clock::now() + ms(30));
+    sch.perform(clock::now() + ms(80));
+    
+    return counter != 8;
 }

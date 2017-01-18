@@ -21,10 +21,14 @@
  ==============================================================================
  */
 
-#include <TestScheduler.hpp>
+#include "TestScheduler.hpp"
 
 int main(int argc, char* const argv[])
 {
-    std::cout << "Unit-Tests - KiwiScheduler: ";
+    std::cout << "Unit-Tests - KiwiScheduler...";
+    assert(perform_test1() == 0);
+    assert(perform_test2() == 0);
+    assert(perform_test3() == 0);
+    std::cout << "\n";
     return 0;
 }

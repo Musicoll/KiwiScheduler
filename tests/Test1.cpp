@@ -21,22 +21,24 @@
  ==============================================================================
  */
 
-// Catch main function
-
-//#define CATCH_CONFIG_RUNNER
-//#include "catch.hpp"
-
-#include <KiwiScheduler.hpp>
-
-#include <thread>
-#include <atomic>
-#include <cstdlib>
-#include <vector>
-#include <cassert>
-
+#include "TestScheduler.hpp"
 using namespace kiwi::scheduler;
 #define MAX_COUNT 128
 static std::atomic<size_t> counter;
+
+class Counter
+{
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::high_resolution_clock;
+    
+    Counter() : m_counter(0) {}
+    
+private:
+    Scheduler           m_scheduler;
+    static const size_t m_max = 128;
+    std::atomic<size_t> m_counter;
+};
+
 
 static void increment()
 {
@@ -75,29 +77,14 @@ static void consumer(Scheduler* sch)
     }
 }
 
-int perform_test()
+extern int perform_test1()
 {
-    using ms = std::chrono::milliseconds;
-    using clock = std::chrono::high_resolution_clock;
     counter = 0;
     Scheduler sch;
-    Task t1(increment);
-    Task t2(increment);
-    Task t3(increment);
-    Task t4(increment);
-    Task t5(increment);
-    
-    sch.add(t1, clock::now() + ms(40));
-    sch.add(t2, clock::now() + ms(20));
-    sch.add(t3, clock::now() + ms(70));
-    sch.add(t4, clock::now() + ms(80));
-    sch.add(t5, clock::now() + ms(50));
-    sch.add(t5, clock::now() + ms(60));
-    
     std::thread prod(producer, &sch);
     std::thread cons(consumer, &sch);
     cons.join();
     prod.join();
-    assert(counter > MAX_COUNT);
-    return 0;
+    
+    return counter < MAX_COUNT;
 }
