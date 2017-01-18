@@ -76,7 +76,7 @@ static void consumer(Scheduler* sch)
 
 int main( int argc, char* const argv[] )
 {
-    std::cout << "Unit-Tests - KiwiScheduler ...\n";
+    std::cout << "Unit-Tests - KiwiScheduler: ";
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
     counter = 0;
@@ -99,5 +99,6 @@ int main( int argc, char* const argv[] )
     cons.join();
     prod.join();
     
+    std::cout << counter <<"\n";
     return 0;
 }

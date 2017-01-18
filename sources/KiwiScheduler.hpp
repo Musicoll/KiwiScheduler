@@ -53,10 +53,14 @@ namespace kiwi
             
             Task*           m_next;         //! The next task in the scheduler.
             time_point_t    m_time;         //! The current time of the task.
+            
+            Task*           m_process_next; //! The next future task in the scheduler.
+            method_t        m_method;       //! The method to call.
+            
             Task*           m_futur_next;   //! The next future task in the scheduler.
             time_point_t    m_futur_time;   //! The future time if it waits for the insertion.
             futur_type_t    m_futur_type;   //! The future action.
-            method_t        m_method;       //! The method to call.
+            
             
             friend class Scheduler;
         };

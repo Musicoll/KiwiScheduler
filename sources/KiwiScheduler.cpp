@@ -24,7 +24,7 @@ namespace kiwi
 {
     namespace scheduler
     {
-        Task::Task(method_t&& m) : m_next(nullptr), m_time(), m_futur_next(nullptr), m_futur_time(), m_method(m)
+        Task::Task(method_t&& m) : m_next(nullptr), m_time(), m_process_next(nullptr), m_method(m), m_futur_next(nullptr), m_futur_time()
         {
             
         }
@@ -54,11 +54,14 @@ namespace kiwi
                 std::lock_guard<std::mutex> lock(m_main_mutex);
                 
                 // Finds the tail of the list to perform now and the head of the new list
+                // We need to save the process next because, if we're out the lock the next
+                // task can change
                 Task *head = m_main, *tail = nullptr;
                 while(head && head->m_time <= time)
                 {
                     tail = head;
-                    head  = head->m_next;
+                    head->m_process_next = head->m_next;
+                    head = head->m_process_next;
                 }
                 // If the tail of the list to perform isn't null:
                 // • The head of the tasks to perform now is the current head of the main list
@@ -66,7 +69,7 @@ namespace kiwi
                 // • The next task of the tail will be null to mark the end
                 if(tail)
                 {
-                    tail->m_next = nullptr;
+                    tail->m_process_next = nullptr;
                     ready        = m_main;
                     m_main       = head;
                 }
@@ -108,7 +111,7 @@ namespace kiwi
             while(ready)
             {
                 ready->m_method();
-                ready = ready->m_next;
+                ready = ready->m_process_next;
             }
         }
         
@@ -201,7 +204,6 @@ namespace kiwi
                     if(m_main == &t)
                     {
                         m_main = t.m_next;
-                        t.m_next = nullptr;
                     }
                     else
                     {
@@ -211,7 +213,6 @@ namespace kiwi
                             if(current == &t)
                             {
                                 previous->m_next = current->m_next;
-                                current->m_next = nullptr;
                                 m_main_mutex.unlock();
                                 return;
                             }
