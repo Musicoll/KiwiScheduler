@@ -2,7 +2,7 @@
  ==============================================================================
  
  This file is part of the KIWI library.
- - Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
+ Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
  
  Permission is granted to use this software under the terms of the GPL v2
  (or any later version). Details can be found at: www.gnu.org/licenses
