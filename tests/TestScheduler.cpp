@@ -29,6 +29,7 @@ int main(int argc, char* const argv[])
     assert(perform_test1() == 0);
     assert(perform_test2() == 0);
     assert(perform_test3() == 0);
+    assert(perform_test4() == 0);
     std::cout << "\n";
     return 0;
 }

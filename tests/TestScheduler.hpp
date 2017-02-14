@@ -37,6 +37,8 @@ int perform_test2();
 // A test where several tasks are inserted, duplicated in different orders.
 int perform_test3();
 
+int perform_test4();
+
 // Todo A test where the callback re-add the task.
 
 #endif // KIWI_SCHEDULER_TEST_HPP_INCLUDED

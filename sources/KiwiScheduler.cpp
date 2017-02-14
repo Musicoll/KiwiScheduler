@@ -233,7 +233,6 @@ namespace kiwi
             }
         }
         
-        
         void Scheduler::prepare(id_t const queue_id)
         {
             m_queues[queue_id];
