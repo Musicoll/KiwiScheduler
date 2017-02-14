@@ -22,6 +22,7 @@
  */
 
 #include "TestScheduler.hpp"
+
 using namespace kiwi::scheduler;
 
 static std::atomic<size_t> counter;
@@ -36,7 +37,7 @@ extern int perform_test3()
     using clock = std::chrono::high_resolution_clock;
     
     counter = 0;
-    Scheduler sch;
+    Queue sch;
     
     Task t1(increment);
     Task t2(increment);

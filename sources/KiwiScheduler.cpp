@@ -24,23 +24,23 @@ namespace kiwi
 {
     namespace scheduler
     {
-        Task::Task(method_t&& m) : m_next(nullptr), m_time(), m_process_next(nullptr), m_method(m), m_futur_next(nullptr), m_futur_time()
+        Task::Task(method_t&& m, const id_t queue_id) : m_next(nullptr), m_time(), m_process_next(nullptr), m_method(m), m_futur_next(nullptr), m_futur_time(), m_queue_id(queue_id)
         {
             
         }
         
         
-        Scheduler::Scheduler() : m_main(nullptr), m_futur(nullptr)
+        Queue::Queue() : m_main(nullptr), m_futur(nullptr)
         {
             
         }
         
-        Scheduler::~Scheduler()
+        Queue::~Queue()
         {
             
         }
         
-        void Scheduler::perform(time_point_t const time)
+        void Queue::perform(time_point_t const time)
         {
             // The list of tasks to perform before the given time
             Task *ready = nullptr;
@@ -115,7 +115,7 @@ namespace kiwi
             }
         }
         
-        void Scheduler::add(Task& t, time_point_t const time)
+        void Queue::add(Task& t, time_point_t const time)
         {
             // If we're not performing on the main list
             if(m_main_mutex.try_lock())
@@ -195,7 +195,7 @@ namespace kiwi
             }
         }
         
-        void Scheduler::remove(Task& t)
+        void Queue::remove(Task& t)
         {
             if(m_main_mutex.try_lock())
             {
@@ -231,6 +231,30 @@ namespace kiwi
                 t.m_futur_type = Task::futur_type_t::to_remove;
                 m_futur = &t;
             }
+        }
+        
+        
+        void Scheduler::prepare(id_t const queue_id)
+        {
+            m_queues[queue_id];
+        }
+        
+        void Scheduler::perform(time_point_t const time)
+        {
+            for(auto& queue : m_queues)
+            {
+                queue.second.perform(time);
+            }
+        }
+        
+        void Scheduler::add(Task& t, time_point_t const time)
+        {
+            m_queues[t.m_queue_id].add(t, time);
+        }
+        
+        void Scheduler::remove(Task& t)
+        {
+            m_queues[t.m_queue_id].remove(t);
         }
     }
 }

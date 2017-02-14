@@ -56,7 +56,7 @@ public:
                              {
                                  std::this_thread::sleep_for(ms(1));
                                  m_value = std::rand() / float(RAND_MAX) * 2.f + 1.f;
-                                 m_scheduler.add(m_task, Scheduler::time_point_t() + ms(m_ndspticks));
+                                 m_scheduler.add(m_task, Queue::time_point_t() + ms(m_ndspticks));
                                  ++m_ndspticks;
                              }
                          });
@@ -68,7 +68,7 @@ public:
                              while(m_state)
                              {
                                  std::this_thread::sleep_for(ms(std::rand() % 10));
-                                 m_scheduler.perform(Scheduler::time_point_t() + ms(m_ndspticks));
+                                 m_scheduler.perform(Queue::time_point_t() + ms(m_ndspticks));
                              }
                          });
         
@@ -77,7 +77,7 @@ public:
         m_state = false;
         dsp.join();
         message.join();
-        m_scheduler.perform(Scheduler::time_point_t() + ms(m_ndspticks));
+        m_scheduler.perform(Queue::time_point_t() + ms(m_ndspticks));
         
         return m_ndspticks < m_counter;
     }
@@ -88,7 +88,7 @@ private:
     float               m_message;
     size_t              m_counter;
     std::atomic<size_t> m_ndspticks;
-    Scheduler           m_scheduler;
+    Queue           m_scheduler;
     Task                m_task;
 };
 

@@ -22,6 +22,7 @@
  */
 
 #include "TestScheduler.hpp"
+
 using namespace kiwi::scheduler;
 #define MAX_COUNT 128
 static std::atomic<size_t> counter;
@@ -34,7 +35,7 @@ class Counter
     Counter() : m_counter(0) {}
     
 private:
-    Scheduler           m_scheduler;
+    Queue           m_scheduler;
     static const size_t m_max = 128;
     std::atomic<size_t> m_counter;
 };
@@ -45,7 +46,7 @@ static void increment()
     counter++;
 }
 
-static void producer(Scheduler* sch)
+static void producer(Queue* sch)
 {
     size_t index = 0;
     std::vector<Task> tasks(MAX_COUNT, Task(increment));
@@ -66,7 +67,7 @@ static void producer(Scheduler* sch)
     }
 }
 
-static void consumer(Scheduler* sch)
+static void consumer(Queue* sch)
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
@@ -80,7 +81,7 @@ static void consumer(Scheduler* sch)
 extern int perform_test1()
 {
     counter = 0;
-    Scheduler sch;
+    Queue sch;
     std::thread prod(producer, &sch);
     std::thread cons(consumer, &sch);
     cons.join();
