@@ -27,26 +27,41 @@
 
 using namespace kiwi::engine;
 
-static std::atomic<size_t> counter;
-static void increment()
-{
-    counter++;
-}
-
-TEST_CASE("Scheduler_3", "[Scheduler]")
+TEST_CASE("Scheduler 3", "[Scheduler]")
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
     
-    counter = 0;
-    Scheduler sch;
+    enum QueueId : typename Scheduler::id_t
+    {
+        DspId       = 0,
+        EngineId    = 1,
+        GuiId       = 2
+    };
     
-    Scheduler::Task t1(increment);
-    Scheduler::Task t2(increment);
-    Scheduler::Task t3(increment);
-    Scheduler::Task t4(increment);
-    Scheduler::Task t5(increment);
-    Scheduler::Task t6(increment);
+    class Counter : public Scheduler::Timer
+    {
+    public:
+        Counter() noexcept : m_counter(0) {}
+        void callback() override { ++m_counter; }
+        size_t get() const noexcept { return m_counter; }
+    private:
+        std::atomic<size_t> m_counter;
+    };
+    
+    Scheduler sch;
+    Counter   cnt;
+    sch.prepare(QueueId::DspId);
+    sch.prepare(QueueId::EngineId);
+    sch.prepare(QueueId::GuiId);
+    sch.prepare(4);
+    
+    Scheduler::Task t1(cnt, DspId);
+    Scheduler::Task t2(cnt, EngineId);
+    Scheduler::Task t3(cnt, DspId);
+    Scheduler::Task t4(cnt, EngineId);
+    Scheduler::Task t5(cnt, GuiId);
+    Scheduler::Task t6(cnt, GuiId);
     
     sch.add(t1, clock::now() + ms(40));
     sch.add(t2, clock::now() + ms(20));
@@ -62,5 +77,5 @@ TEST_CASE("Scheduler_3", "[Scheduler]")
     sch.add(t6, clock::now() + ms(30));
     sch.perform(clock::now() + ms(80));
     
-    CHECK(counter == 8);
+    CHECK(cnt.get() == 8);
 }

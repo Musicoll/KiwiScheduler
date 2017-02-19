@@ -25,37 +25,28 @@
 #include <thread>
 #include "catch.hpp"
 #include "../sources/KiwiScheduler.hpp"
+#define KIWI_TEST2_MAX 128
 
 using namespace kiwi::engine;
-#define MAX_COUNT 128
-static std::atomic<size_t> counter;
 
-class Counter
+class Counter : public Scheduler, public Scheduler::Timer
 {
-    using ms = std::chrono::milliseconds;
-    using clock = std::chrono::high_resolution_clock;
-    
-    Counter() : m_counter(0) {}
+public:
+    Counter() noexcept : m_counter(0) {}
+    void callback() override { ++m_counter; }
+    size_t get() const noexcept { return m_counter; }
     
 private:
-    Scheduler           m_scheduler;
-    static const size_t m_max = 128;
     std::atomic<size_t> m_counter;
 };
 
-
-static void increment()
-{
-    counter++;
-}
-
-static void producer(Scheduler* sch)
+static void producer(Counter* sch)
 {
     size_t index = 0;
-    std::vector<Scheduler::Task> tasks(MAX_COUNT, Scheduler::Task(increment));
+    std::vector<Scheduler::Task> tasks(KIWI_TEST2_MAX, *sch);
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
-    while(counter < MAX_COUNT)
+    while(sch->get() < KIWI_TEST2_MAX)
     {
         std::this_thread::sleep_for(ms(10));
         if(index%2)
@@ -66,15 +57,15 @@ static void producer(Scheduler* sch)
         {
             sch->add(tasks[index], clock::now() + ms(17));
         }
-        index = (index + 1) % MAX_COUNT;
+        index = (index + 1) % KIWI_TEST2_MAX;
     }
 }
 
-static void consumer(Scheduler* sch)
+static void consumer(Counter* sch)
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
-    while(counter < MAX_COUNT)
+    while(sch->get() < KIWI_TEST2_MAX)
     {
         std::this_thread::sleep_for(ms(20));
         sch->perform(clock::now());
@@ -83,12 +74,11 @@ static void consumer(Scheduler* sch)
 
 TEST_CASE("Scheduler_1", "[Scheduler]")
 {
-    counter = 0;
-    Scheduler sch;
+    Counter sch;
     std::thread prod(producer, &sch);
     std::thread cons(consumer, &sch);
     cons.join();
     prod.join();
     
-    CHECK(counter >= MAX_COUNT);
+    CHECK(sch.get() >= KIWI_TEST2_MAX);
 }

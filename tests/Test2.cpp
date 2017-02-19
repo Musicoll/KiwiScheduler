@@ -29,15 +29,15 @@
 
 using namespace kiwi::engine;
 
-class MessageDspObject
+class MessageDspObject : public Scheduler::Timer
 {
 public:
-    MessageDspObject() : m_task([this](){callback();})
+    MessageDspObject() : m_task(*this)
     {
         srand(unsigned(time(NULL)));
     }
     
-    void callback()
+    void callback() override
     {
         m_message = m_value;
         m_counter++;

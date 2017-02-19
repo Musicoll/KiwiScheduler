@@ -99,7 +99,7 @@ namespace kiwi
             // As we don't touch the task, we can call it without locks
             while(ready)
             {
-                ready->m_method();
+                ready->m_timer.callback();
                 ready = ready->m_process_next;
             }
         }

@@ -43,8 +43,21 @@ namespace kiwi
         {
         public:
             using id_t              = uint32_t;
-            using method_t          = std::function<void()>;
             using time_point_t      = std::chrono::high_resolution_clock::time_point;
+            
+            // ============================================================================ //
+            //                                      TIMER                                   //
+            // ============================================================================ //
+            //! @brief The timer is the pure virtual class that used by task.
+            class Timer
+            {
+            public:
+                //! @brief The destructor
+                virtual ~Timer() {}
+                
+                //! @brief The callback method
+                virtual void callback() = 0;
+            };
             
             // ============================================================================ //
             //                                      TASK                                    //
@@ -56,9 +69,9 @@ namespace kiwi
             public:
                 
                 //! @brief the constructor.
-                //! @param m The method to call.
+                //! @param master The method to call.
                 //! @param queue_id The id of the queue in wich it will be added.
-                Task(method_t&& m, const id_t queue_id = 0) : m_method(m), m_queue_id(queue_id) {}
+                Task(Timer& master, const id_t queue_id = 0) : m_timer(master), m_queue_id(queue_id) {}
                 
             private:
                 enum futur_type_t : bool
@@ -71,7 +84,7 @@ namespace kiwi
                 time_point_t    m_time;                     //!< The current time of the task.
                 
                 Task*           m_process_next = nullptr;   //!< The next future task in the queue.
-                method_t        m_method;                   //!< The method to call.
+                Timer&          m_timer;                    //!< The method to call.
                 
                 Task*           m_futur_next  = nullptr;    //!< The next future task in the queue.
                 time_point_t    m_futur_time;   //!< The future time if it waits for the insertion.
