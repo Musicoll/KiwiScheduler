@@ -34,16 +34,6 @@ namespace kiwi
         //                                          QUEUE                                       //
         // ==================================================================================== //
         
-        Queue::Queue() : m_main(nullptr), m_futur(nullptr)
-        {
-            
-        }
-        
-        Queue::~Queue()
-        {
-            
-        }
-        
         void Queue::perform(time_point_t const time)
         {
             // The list of tasks to perform before the given time

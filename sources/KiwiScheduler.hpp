@@ -38,9 +38,9 @@ namespace kiwi
         class Task
         {
         public:
-            using id_t              = uint32_t;
-            using method_t          = std::function<void()>;
-            using time_point_t      = std::chrono::high_resolution_clock::time_point;
+            using id_t              = uint32_t;                                       //! The type for the Queue ID.
+            using method_t          = std::function<void()>;                          //! The type for the method.
+            using time_point_t      = std::chrono::high_resolution_clock::time_point; //! The type for time point.
 
             //! @brief the constructor.
             //! @param m The method to call.
@@ -83,12 +83,6 @@ namespace kiwi
         public:
             using time_point_t = Task::time_point_t;
             
-            //! @brief The constructor.
-            Queue();
-            
-            //! @brief The destructor.
-            ~Queue();
-            
             //! @brief Performs the tasks until the specified time.
             //! @details The method calls all the task before the specified time and then adds
             //! tasks that could have been added during this operation.
@@ -111,10 +105,10 @@ namespace kiwi
             void remove(Task& t);
             
         private:
-            Task*           m_main;         //! The main sorted linked list of tasks.
-            Task*           m_futur;        //! The linked list of tasks that will be inserted.
-            std::mutex      m_main_mutex;   //! The main list mutex.
-            std::mutex      m_futur_mutex;  //! The futur list mutex.
+            Task*           m_main  = nullptr;  //! The main sorted linked list of tasks.
+            Task*           m_futur = nullptr;  //! The linked list of tasks that will be inserted.
+            std::mutex      m_main_mutex;       //! The main list mutex.
+            std::mutex      m_futur_mutex;      //! The futur list mutex.
         };
         
         // ==================================================================================== //
@@ -127,17 +121,24 @@ namespace kiwi
         class Scheduler
         {
         public:
-            using time_point_t = Task::time_point_t;
-            using id_t         = Task::id_t;
+            using time_point_t = Task::time_point_t; //! The type for time point.
+            using id_t         = Task::id_t;         //! The type for the ID of a queue.
             
             //! @brief Prepare the scheduler for a specific queue.
-            //! @details ....
-            //! @param queue_id ...
+            //! @details If a queue has never been used, the first use of queue calls its
+            //! allocator. If for some case, you want to avoid this allocation, for example in
+            //! the audio thead, you can this method to pre-allocate the queue.
+            //! @param queue_id The id of the queue to prepare.
             void prepare(id_t const queue_id);
             
             //! @brief Performs the tasks until the specified time.
-            //! @details ....
+            //! @details The method performs all the tasks of all the queues, until the
+            //! defined time point. So for each queue, the method calls all the task before
+            //! the specified time and then adds tasks that could have been added during this
+            //! operation.
             //! @param time The time point.
+            //! @todo We can add another time point that specified when we should avoid to
+            //! continue the process.
             void perform(time_point_t const time);
             
             //! @brief Adds a task at a specified time.
