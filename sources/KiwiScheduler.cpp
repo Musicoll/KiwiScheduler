@@ -177,7 +177,7 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                if(task.m_futur_type != Task::futur_type_t::available)
+                if(task.m_futur_type == Task::futur_type_t::available)
                 {
                     task.m_futur_next = m_futur;
                     m_futur = &task;
@@ -219,7 +219,7 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                if(task.m_futur_type != Task::futur_type_t::available)
+                if(task.m_futur_type == Task::futur_type_t::available)
                 {
                     task.m_futur_next = m_futur;
                     m_futur = &task;
