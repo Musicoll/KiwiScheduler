@@ -50,7 +50,7 @@ extern int perform_test4()
     sche.prepare(4);
     
     counter = 0;
-    Queue sch;
+    Scheduler sch;
     
     Task t1(increment, DspId);
     Task t2(increment, EngineId);

@@ -34,7 +34,7 @@ namespace kiwi
         //                                          QUEUE                                       //
         // ==================================================================================== //
         
-        void Queue::perform(time_point_t const time)
+        void Scheduler::Queue::perform(time_point_t const time)
         {
             // The list of tasks to perform before the given time
             Task *ready = nullptr;
@@ -109,7 +109,7 @@ namespace kiwi
             }
         }
         
-        void Queue::add(Task& task, time_point_t const time)
+        void Scheduler::Queue::add(Task& task, time_point_t const time)
         {
             // If we're not performing on the main list
             if(m_main_mutex.try_lock())
@@ -189,7 +189,7 @@ namespace kiwi
             }
         }
         
-        void Queue::remove(Task& task)
+        void Scheduler::Queue::remove(Task& task)
         {
             if(m_main_mutex.try_lock())
             {

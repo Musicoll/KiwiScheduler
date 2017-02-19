@@ -35,7 +35,7 @@ class Counter
     Counter() : m_counter(0) {}
     
 private:
-    Queue           m_scheduler;
+    Scheduler           m_scheduler;
     static const size_t m_max = 128;
     std::atomic<size_t> m_counter;
 };
@@ -46,7 +46,7 @@ static void increment()
     counter++;
 }
 
-static void producer(Queue* sch)
+static void producer(Scheduler* sch)
 {
     size_t index = 0;
     std::vector<Task> tasks(MAX_COUNT, Task(increment));
@@ -67,7 +67,7 @@ static void producer(Queue* sch)
     }
 }
 
-static void consumer(Queue* sch)
+static void consumer(Scheduler* sch)
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
@@ -81,7 +81,7 @@ static void consumer(Queue* sch)
 extern int perform_test1()
 {
     counter = 0;
-    Queue sch;
+    Scheduler sch;
     std::thread prod(producer, &sch);
     std::thread cons(consumer, &sch);
     cons.join();

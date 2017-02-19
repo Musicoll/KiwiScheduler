@@ -37,7 +37,7 @@ extern int perform_test3()
     using clock = std::chrono::high_resolution_clock;
     
     counter = 0;
-    Queue sch;
+    Scheduler sch;
     
     Task t1(increment);
     Task t2(increment);

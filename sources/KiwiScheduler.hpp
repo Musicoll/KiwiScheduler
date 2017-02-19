@@ -70,48 +70,6 @@ namespace kiwi
         };
         
         // ==================================================================================== //
-        //                                      QUEUE                                           //
-        // ==================================================================================== //
-        //! @brief The container for a set of tasks.
-        //! @details The queue manages a set of taks for one consumer and one producer. It
-        //! means that only one thread can add or remove the tasks and only one tread can
-        //! consume the tasks. If only one thread can add or remove a task, it means that
-        //! these two methods can only be called sequentially but the perform method can be
-        //! called in concurence.
-        class Queue
-        {
-        public:
-            using time_point_t = Task::time_point_t;
-            
-            //! @brief Performs the tasks until the specified time.
-            //! @details The method calls all the task before the specified time and then adds
-            //! tasks that could have been added during this operation.
-            //! @param time The time point.
-            void perform(time_point_t const time);
-            
-            //! @brief Adds a task at a specified time.
-            //! @details Only one instance of a task can be added to the queue because the
-            //! task owns its time point, so if the queue owns two instances of the same
-            //! task one of these instances won't have the right time. Therefore, the task is
-            //! removed from the queue if it has already been added and not consumed.
-            //! @param task The task to add.
-            //! @param time The time point where the task should be inserted.
-            void add(Task& task, time_point_t const time);
-            
-            //! @brief Removes a task.
-            //! @details This method is also lock free but for lock reasons, the method can't
-            //! be used by the add method.
-            //! @param task The task to remove.
-            void remove(Task& task);
-            
-        private:
-            Task*           m_main  = nullptr;  //! The main sorted linked list of tasks.
-            Task*           m_futur = nullptr;  //! The linked list of tasks that will be inserted.
-            std::mutex      m_main_mutex;       //! The main list mutex.
-            std::mutex      m_futur_mutex;      //! The futur list mutex.
-        };
-        
-        // ==================================================================================== //
         //                                      SCHEDULER                                       //
         // ==================================================================================== //
         //! @brief The manager of tasks.
@@ -162,6 +120,49 @@ namespace kiwi
             void remove(Task& task);
             
         private:
+            
+            // ==================================================================================== //
+            //                                      QUEUE                                           //
+            // ==================================================================================== //
+            //! @brief The container for a set of tasks.
+            //! @details The queue manages a set of taks for one consumer and one producer. It
+            //! means that only one thread can add or remove the tasks and only one tread can
+            //! consume the tasks. If only one thread can add or remove a task, it means that
+            //! these two methods can only be called sequentially but the perform method can be
+            //! called in concurence.
+            class Queue
+            {
+            public:
+                using time_point_t = Task::time_point_t;
+                
+                //! @brief Performs the tasks until the specified time.
+                //! @details The method calls all the task before the specified time and then adds
+                //! tasks that could have been added during this operation.
+                //! @param time The time point.
+                void perform(time_point_t const time);
+                
+                //! @brief Adds a task at a specified time.
+                //! @details Only one instance of a task can be added to the queue because the
+                //! task owns its time point, so if the queue owns two instances of the same
+                //! task one of these instances won't have the right time. Therefore, the task is
+                //! removed from the queue if it has already been added and not consumed.
+                //! @param task The task to add.
+                //! @param time The time point where the task should be inserted.
+                void add(Task& task, time_point_t const time);
+                
+                //! @brief Removes a task.
+                //! @details This method is also lock free but for lock reasons, the method can't
+                //! be used by the add method.
+                //! @param task The task to remove.
+                void remove(Task& task);
+                
+            private:
+                Task*           m_main  = nullptr;  //! The main sorted linked list of tasks.
+                Task*           m_futur = nullptr;  //! The linked list of tasks that will be inserted.
+                std::mutex      m_main_mutex;       //! The main list mutex.
+                std::mutex      m_futur_mutex;      //! The futur list mutex.
+            };
+            
             std::map<id_t, Queue> m_queues; //! The list of queues.
         };
     }
