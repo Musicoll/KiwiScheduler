@@ -18,10 +18,9 @@
  ==============================================================================
  */
 
-#ifndef KIWI_SCHEDULER_HPP_INCLUDED
-#define KIWI_SCHEDULER_HPP_INCLUDED
+#ifndef KIWI_ENGINE_SCHEDULER_HPP_INCLUDED
+#define KIWI_ENGINE_SCHEDULER_HPP_INCLUDED
 
-#include <iostream>
 #include <chrono>
 #include <mutex>
 #include <map>
@@ -162,6 +161,6 @@ namespace kiwi
     }
 }
 
-#endif // KIWI_SCHEDULER_HPP_INCLUDED
+#endif // KIWI_ENGINE_SCHEDULER_HPP_INCLUDED
 
 

@@ -21,6 +21,8 @@
  ==============================================================================
  */
 
+
+#include <iostream>
 #include "TestScheduler.hpp"
 
 int main(int argc, char* const argv[])
