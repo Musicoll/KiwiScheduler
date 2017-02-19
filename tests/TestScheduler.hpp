@@ -2,7 +2,7 @@
  ==============================================================================
  
  This file is part of the KIWI library.
- - Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
+ Copyright (c) 2016, CICM, ANR MUSICOLL, Eliott Paris, Pierre Guillot, Jean Millot.
  
  Permission is granted to use this software under the terms of the GPL v2
  (or any later version). Details can be found at: www.gnu.org/licenses
@@ -31,11 +31,13 @@
 // A concurency test.
 int perform_test1();
 
-// Todo A test where the callback re-add the task.
+
 int perform_test2();
 
 // A test where several tasks are inserted, duplicated in different orders.
 int perform_test3();
+
+// Todo A test where the callback re-add the task.
 
 #endif // KIWI_SCHEDULER_TEST_HPP_INCLUDED
 
