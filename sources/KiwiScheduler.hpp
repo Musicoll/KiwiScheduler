@@ -38,9 +38,9 @@ namespace kiwi
         class Task
         {
         public:
-            using id_t              = uint32_t;                                       //! The type for the Queue ID.
-            using method_t          = std::function<void()>;                          //! The type for the method.
-            using time_point_t      = std::chrono::high_resolution_clock::time_point; //! The type for time point.
+            using id_t              = uint32_t;
+            using method_t          = std::function<void()>; 
+            using time_point_t      = std::chrono::high_resolution_clock::time_point;
 
             //! @brief the constructor.
             //! @param m The method to call.
@@ -65,13 +65,12 @@ namespace kiwi
             futur_type_t    m_futur_type;   //! The future action.
             
             const id_t      m_queue_id;     //! The id of the queue.
-            friend class Queue;
             friend class Scheduler;
         };
         
-        // ==================================================================================== //
-        //                                      SCHEDULER                                       //
-        // ==================================================================================== //
+        // ================================================================================ //
+        //                                      SCHEDULER                                   //
+        // ================================================================================ //
         //! @brief The manager of tasks.
         //! @details The scheduler manages a set of tasks inside several queues. It a single
         //! consumer but it can accepts several producer defined by ids, that match with
@@ -121,9 +120,9 @@ namespace kiwi
             
         private:
             
-            // ==================================================================================== //
-            //                                      QUEUE                                           //
-            // ==================================================================================== //
+            // ============================================================================ //
+            //                                  SCHEDULER QUEUE                             //
+            // ============================================================================ //
             //! @brief The container for a set of tasks.
             //! @details The queue manages a set of taks for one consumer and one producer. It
             //! means that only one thread can add or remove the tasks and only one tread can
@@ -132,27 +131,25 @@ namespace kiwi
             //! called in concurence.
             class Queue
             {
-            public:
-                using time_point_t = Task::time_point_t;
-                
+            public:                
                 //! @brief Performs the tasks until the specified time.
-                //! @details The method calls all the task before the specified time and then adds
-                //! tasks that could have been added during this operation.
+                //! @details The method calls all the task before the specified time and then
+                //! adds tasks that could have been added during this operation.
                 //! @param time The time point.
                 void perform(time_point_t const time);
                 
                 //! @brief Adds a task at a specified time.
                 //! @details Only one instance of a task can be added to the queue because the
                 //! task owns its time point, so if the queue owns two instances of the same
-                //! task one of these instances won't have the right time. Therefore, the task is
-                //! removed from the queue if it has already been added and not consumed.
+                //! task one of these instances won't have the right time. Therefore, the task
+                //! is removed from the queue if it has already been added and not consumed.
                 //! @param task The task to add.
                 //! @param time The time point where the task should be inserted.
                 void add(Task& task, time_point_t const time);
                 
                 //! @brief Removes a task.
-                //! @details This method is also lock free but for lock reasons, the method can't
-                //! be used by the add method.
+                //! @details This method is also lock free but for lock reasons, the method
+                //! can't be used by the add method.
                 //! @param task The task to remove.
                 void remove(Task& task);
                 
