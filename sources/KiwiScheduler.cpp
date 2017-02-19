@@ -109,26 +109,26 @@ namespace kiwi
             }
         }
         
-        void Queue::add(Task& t, time_point_t const time)
+        void Queue::add(Task& task, time_point_t const time)
         {
             // If we're not performing on the main list
             if(m_main_mutex.try_lock())
             {
-                t.m_time = time;
+                task.m_time = time;
                 if(m_main)
                 {
                     // First remove the task if the task is already in the main list
-                    if(m_main == &t)
+                    if(m_main == &task)
                     {
-                        m_main = t.m_next;
-                        t.m_next = nullptr;
+                        m_main = task.m_next;
+                        task.m_next = nullptr;
                     }
                     else
                     {
                         Task *current = m_main->m_next, *previous = m_main;
                         while(current)
                         {
-                            if(current == &t)
+                            if(current == &task)
                             {
                                 previous->m_next = current->m_next;
                                 current->m_next = nullptr;
@@ -141,10 +141,10 @@ namespace kiwi
                     // Then add the task to the main list
                     if(m_main)
                     {
-                        if(m_main->m_time > t.m_time)
+                        if(m_main->m_time > task.m_time)
                         {
-                            t.m_next = m_main;
-                            m_main   = &t;
+                            task.m_next = m_main;
+                            m_main   = &task;
                             m_main_mutex.unlock();
                             return;
                         }
@@ -152,29 +152,29 @@ namespace kiwi
                         Task *current = previous->m_next;
                         while(current)
                         {
-                            if(current->m_time > t.m_time)
+                            if(current->m_time > task.m_time)
                             {
-                                t.m_next = current;
-                                previous->m_next = &t;
+                                task.m_next = current;
+                                previous->m_next = &task;
                                 m_main_mutex.unlock();
                                 return;
                             }
                             previous = current;
                             current = current->m_next;
                         }
-                        previous->m_next = &t;
-                        t.m_next = nullptr;
+                        previous->m_next = &task;
+                        task.m_next = nullptr;
                     }
                     else
                     {
-                        m_main = &t;
-                        t.m_next = nullptr;
+                        m_main = &task;
+                        task.m_next = nullptr;
                     }
                 }
                 else
                 {
-                    m_main = &t;
-                    t.m_next = nullptr;
+                    m_main = &task;
+                    task.m_next = nullptr;
                 }
                 m_main_mutex.unlock();
             }
@@ -182,29 +182,29 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                t.m_futur_time = time;
-                t.m_futur_next = m_futur;
-                t.m_futur_type = Task::futur_type_t::to_add;
-                m_futur = &t;
+                task.m_futur_time = time;
+                task.m_futur_next = m_futur;
+                task.m_futur_type = Task::futur_type_t::to_add;
+                m_futur = &task;
             }
         }
         
-        void Queue::remove(Task& t)
+        void Queue::remove(Task& task)
         {
             if(m_main_mutex.try_lock())
             {
                 if(m_main)
                 {
-                    if(m_main == &t)
+                    if(m_main == &task)
                     {
-                        m_main = t.m_next;
+                        m_main = task.m_next;
                     }
                     else
                     {
                         Task *current = m_main->m_next, *previous = m_main;
                         while(current)
                         {
-                            if(current == &t)
+                            if(current == &task)
                             {
                                 previous->m_next = current->m_next;
                                 m_main_mutex.unlock();
@@ -220,10 +220,10 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                t.m_futur_time = time_point_t::min();
-                t.m_futur_next = m_futur;
-                t.m_futur_type = Task::futur_type_t::to_remove;
-                m_futur = &t;
+                task.m_futur_time = time_point_t::min();
+                task.m_futur_next = m_futur;
+                task.m_futur_type = Task::futur_type_t::to_remove;
+                m_futur = &task;
             }
         }
         

@@ -93,16 +93,16 @@ namespace kiwi
             //! @details Only one instance of a task can be added to the queue because the
             //! task owns its time point, so if the queue owns two instances of the same
             //! task one of these instances won't have the right time. Therefore, the task is
-            //! removed from the list if it has already been added and not consumed.
-            //! @param t    The task to add.
+            //! removed from the queue if it has already been added and not consumed.
+            //! @param task The task to add.
             //! @param time The time point where the task should be inserted.
-            void add(Task& t, time_point_t const time);
+            void add(Task& task, time_point_t const time);
             
             //! @brief Removes a task.
             //! @details This method is also lock free but for lock reasons, the method can't
             //! be used by the add method.
-            //! @param t The task to remove.
-            void remove(Task& t);
+            //! @param task The task to remove.
+            void remove(Task& task);
             
         private:
             Task*           m_main  = nullptr;  //! The main sorted linked list of tasks.
@@ -149,7 +149,9 @@ namespace kiwi
             //! queue if needed. Only one instance of a task can be added to a queue because
             //! the task owns its time point, so if the queue owns two instances of the same
             //! task one of these instances won't have the right time. Therefore, the task is
-            //! removed from the queue if it has already been added and not consumed.
+            //! removed from the queue if it has already been added and not consumed. The task
+            //! is already defined by a queue's id, so at the end only one instance of a task
+            //! can be added to a scheduler.
             //! @param task The task to add.
             //! @param time The time point where the task should be inserted.
             void add(Task& task, time_point_t const time);
