@@ -92,7 +92,6 @@ namespace kiwi
             }
             
             
-            
             // ------------------------------------------//
             // Performs the tasks                        //
             // ------------------------------------------//
@@ -110,6 +109,7 @@ namespace kiwi
             if(m_main_mutex.try_lock())
             {
                 task.m_time = time;
+                task.m_futur_type = Task::futur_type_t::available;
                 if(m_main)
                 {
                     // First remove the task if the task is already in the main list
@@ -177,10 +177,13 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
+                if(task.m_futur_type != Task::futur_type_t::available)
+                {
+                    task.m_futur_next = m_futur;
+                    m_futur = &task;
+                }
                 task.m_futur_time = time;
-                task.m_futur_next = m_futur;
                 task.m_futur_type = Task::futur_type_t::to_add;
-                m_futur = &task;
             }
         }
         
@@ -188,6 +191,7 @@ namespace kiwi
         {
             if(m_main_mutex.try_lock())
             {
+                task.m_futur_type = Task::futur_type_t::available;
                 if(m_main)
                 {
                     if(m_main == &task)
@@ -215,10 +219,13 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
+                if(task.m_futur_type != Task::futur_type_t::available)
+                {
+                    task.m_futur_next = m_futur;
+                    m_futur = &task;
+                }
                 task.m_futur_time = time_point_t::min();
-                task.m_futur_next = m_futur;
                 task.m_futur_type = Task::futur_type_t::to_remove;
-                m_futur = &task;
             }
         }
         

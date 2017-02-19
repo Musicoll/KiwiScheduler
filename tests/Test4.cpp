@@ -27,6 +27,7 @@
 #include "catch.hpp"
 #include "../sources/KiwiScheduler.hpp"
 
+#define KIWI_SCHEDULER_TEST4_TIME_MAX 1000
 using namespace kiwi::engine;
 
 class Application : public Scheduler
@@ -45,9 +46,10 @@ class Application : public Scheduler
     };
     
     void defer(Task& task, ms const time) {
-        Scheduler::add(task, time_t() + ms(unsigned(m_time.load() * 1.64)) + time); }
+        Scheduler::add(task, time_t() + ms(m_time.load()) + time); }
+    
     void perform() {
-        Scheduler::perform(time_t() + ms(unsigned(m_time.load() * 1.64))); }
+        Scheduler::perform(time_t() + ms(m_time.load())); }
     
     void setTicksGui(size_t const n) { m_ticks_gui = n > m_ticks_gui  ? n : m_ticks_gui; }
     void setTicksDsp(size_t const n) { m_ticks_dsp = n > m_ticks_dsp  ? n : m_ticks_dsp; }
@@ -105,9 +107,8 @@ class Application : public Scheduler
     };
     
 public:
-    void run()
+    bool run()
     {
-        size_t time_limit = 10000;
         m_time      = 0;
         m_ticks_dsp = 0;
         m_ticks_gui = 0;
@@ -117,6 +118,9 @@ public:
         std::vector<DspObject> objs_dsp(256, *this);
         std::vector<GuiObject> objs_gui(64, *this);
         std::vector<MesObject> objs_mes(128, *this);
+        Scheduler::prepare(ThreadId::DspId);
+        Scheduler::prepare(ThreadId::GuiId);
+        Scheduler::prepare(ThreadId::EngineId);
 
         
         std::thread thread_dsp([this, &state, &objs_dsp]()
@@ -128,6 +132,7 @@ public:
                                            obj.process();
                                        }
                                        ++m_time;
+                                       state = m_time.load() < KIWI_SCHEDULER_TEST4_TIME_MAX;
                                        std::this_thread::sleep_for(ms(1));
                                    }
                                });
@@ -146,20 +151,18 @@ public:
         
         while(state)
         {
-            std::this_thread::sleep_for(ms(std::rand() % 10));
             for(auto& obj : objs_mes)
             {
                 obj.process();
             }
             perform();
-            if(size_t(double(m_time) * 1.64) > time_limit)
-            {
-                state = false;
-            }
+            std::this_thread::sleep_for(ms(std::rand() % 10));
         }
         
         thread_dsp.join();
         thread_gui.join();
+        
+        return true;
     }
     
 private:
@@ -172,5 +175,7 @@ private:
 TEST_CASE("Scheduler 4", "[Scheduler]")
 {
     Application app;
-    app.run();
+    CHECK(app.run());
+    CHECK(app.run());
+    CHECK(app.run());
 }

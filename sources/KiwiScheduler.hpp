@@ -74,10 +74,11 @@ namespace kiwi
                 Task(Timer& master, const id_t queue_id = 0) : m_timer(master), m_queue_id(queue_id) {}
                 
             private:
-                enum futur_type_t : bool
+                enum futur_type_t : unsigned
                 {
-                    to_add    = true,
-                    to_remove = false
+                    available = 0,
+                    to_add    = 1,
+                    to_remove = 2
                 };
                 
                 Task*           m_next = nullptr;           //!< The next task in the queue.
