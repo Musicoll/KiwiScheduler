@@ -89,7 +89,7 @@ namespace kiwi
                 
                 Task*           m_futur_next  = nullptr;    //!< The next future task in the queue.
                 time_point_t    m_futur_time;   //!< The future time if it waits for the insertion.
-                futur_type_t    m_futur_type;   //!< The future action.
+                futur_type_t    m_futur_type = futur_type_t::available;   //!< The future action.
                 const id_t      m_queue_id;     //!< The id of the queue.
                 friend class Scheduler;
             };

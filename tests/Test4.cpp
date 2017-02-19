@@ -113,8 +113,9 @@ public:
         m_ticks_dsp = 0;
         m_ticks_gui = 0;
         m_ticks_mes = 0;
-        std::atomic<bool> state;
-        state = true;
+        
+        std::atomic<bool> state, valid;
+        valid = state = true;
         std::vector<DspObject> objs_dsp(256, *this);
         std::vector<GuiObject> objs_gui(64, *this);
         std::vector<MesObject> objs_mes(128, *this);
@@ -122,6 +123,7 @@ public:
         Scheduler::prepare(ThreadId::GuiId);
         Scheduler::prepare(ThreadId::EngineId);
 
+        auto start_time = clock::now();
         
         std::thread thread_dsp([this, &state, &objs_dsp]()
                                {
@@ -149,6 +151,19 @@ public:
                                    }
                                });
         
+        std::thread thread_check([this, &state, &start_time, &valid]()
+                               {
+                                   while(state)
+                                   {
+                                       if(std::chrono::duration_cast<ms>(clock::now() - start_time).count() > KIWI_SCHEDULER_TEST4_TIME_MAX * 10)
+                                       {
+                                           state = false;
+                                           valid = false;
+                                       }
+                                       std::this_thread::sleep_for(ms(1));
+                                   }
+                               });
+        
         while(state)
         {
             for(auto& obj : objs_mes)
@@ -161,8 +176,9 @@ public:
         
         thread_dsp.join();
         thread_gui.join();
+        thread_check.join();
         
-        return true;
+        return valid;
     }
     
 private:
@@ -175,6 +191,9 @@ private:
 TEST_CASE("Scheduler 4", "[Scheduler]")
 {
     Application app;
+    CHECK(app.run());
+    CHECK(app.run());
+    CHECK(app.run());
     CHECK(app.run());
     CHECK(app.run());
     CHECK(app.run());
