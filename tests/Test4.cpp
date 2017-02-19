@@ -64,8 +64,8 @@ class Application : public Scheduler
             m_master.setTicksMes(m_nticks); }
         void process() {
             ++m_nticks;
-            if(!m_nticks%4)
-                m_master.defer(m_task, ms(std::rand() % 100));
+            if(m_nticks%2)
+                m_master.defer(m_task, ms(std::rand() % 20));
             else
                 m_master.remove(m_task);
         }
