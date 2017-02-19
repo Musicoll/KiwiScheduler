@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <thread>
+#include <iostream>
 #include "catch.hpp"
 #include "../sources/KiwiScheduler.hpp"
 
@@ -43,17 +44,22 @@ class Application : public Scheduler
         GuiId       = 2
     };
     
-    void defer(Task& task, ms const time) { Scheduler::add(task, clock::now() + time); }
-    void setTicksGui(size_t const n) { m_ticks_gui = n; }
-    void setTicksDsp(size_t const n) { m_ticks_dsp = n; }
-    void setTicksMes(size_t const n) { m_ticks_mes = n; }
+    void defer(Task& task, ms const time) {
+        Scheduler::add(task, time_t() + ms(unsigned(m_time.load() * 1.64)) + time); }
+    void perform() {
+        Scheduler::perform(time_t() + ms(unsigned(m_time.load() * 1.64))); }
+    
+    void setTicksGui(size_t const n) { m_ticks_gui = n > m_ticks_gui  ? n : m_ticks_gui; }
+    void setTicksDsp(size_t const n) { m_ticks_dsp = n > m_ticks_dsp  ? n : m_ticks_dsp; }
+    void setTicksMes(size_t const n) { m_ticks_mes = n > m_ticks_mes  ? n : m_ticks_mes; }
     
     class MesObject : public Timer
     {
     public:
         MesObject(Application& app) : m_master(app), m_task(*this, ThreadId::EngineId), m_nticks(0) {}
         MesObject(MesObject const& o) : m_master(o.m_master), m_task(*this, ThreadId::EngineId), m_nticks(0) {}
-        void callback() override { m_master.setTicksMes(m_nticks); }
+        void callback() override {
+            m_master.setTicksMes(m_nticks); }
         void process() {
             ++m_nticks;
             if(!m_nticks%4)
@@ -72,7 +78,8 @@ class Application : public Scheduler
     public:
         DspObject(Application& app) : m_master(app), m_task(*this, ThreadId::DspId), m_nticks(0) {}
         DspObject(DspObject const& o) : m_master(o.m_master), m_task(*this, ThreadId::DspId), m_nticks(0) {}
-        void callback() override { m_master.setTicksDsp(m_nticks); }
+        void callback() override {
+            m_master.setTicksDsp(m_nticks); }
         void process() { ++m_nticks; m_master.defer(m_task, ms(0)); }
         
     private:
@@ -87,7 +94,8 @@ class Application : public Scheduler
         GuiObject(Application& app) : m_master(app), m_task(*this, ThreadId::GuiId), m_nticks(0) {}
         GuiObject(GuiObject const& o) : m_master(o.m_master), m_task(*this, ThreadId::GuiId), m_nticks(0) {}
         ~GuiObject() { m_master.remove(m_task); }
-        void callback() override { m_master.setTicksGui(m_nticks); }
+        void callback() override {
+            m_master.setTicksGui(m_nticks); }
         void process() { ++m_nticks; m_master.defer(m_task, ms(0)); }
         
     private:
@@ -99,49 +107,55 @@ class Application : public Scheduler
 public:
     void run()
     {
+        size_t time_limit = 10000;
+        m_time      = 0;
         m_ticks_dsp = 0;
         m_ticks_gui = 0;
         m_ticks_mes = 0;
-        bool state_dsp = true;
-        bool state_gui = true;
-        std::vector<DspObject> objs_dsp(512, *this);
+        std::atomic<bool> state;
+        state = true;
+        std::vector<DspObject> objs_dsp(256, *this);
         std::vector<GuiObject> objs_gui(64, *this);
         std::vector<MesObject> objs_mes(128, *this);
 
         
-        std::thread thread_dsp([this, &state_dsp, &objs_dsp]()
+        std::thread thread_dsp([this, &state, &objs_dsp]()
                                {
-                                   while(state_dsp)
+                                   while(state)
                                    {
-                                       std::this_thread::sleep_for(ms(1));
                                        for(auto& obj : objs_dsp)
                                        {
                                            obj.process();
                                        }
+                                       ++m_time;
+                                       std::this_thread::sleep_for(ms(1));
                                    }
                                });
         
-        std::thread thread_gui([this, &state_gui, &objs_gui]()
+        std::thread thread_gui([this, &state, &objs_gui]()
                                {
-                                   while(state_gui)
+                                   while(state)
                                    {
-                                       std::this_thread::sleep_for(ms(20));
                                        for(auto& obj : objs_gui)
                                        {
                                            obj.process();
                                        }
+                                       std::this_thread::sleep_for(ms(20));
                                    }
                                });
         
-        
-        while(state_dsp && state_gui)
+        while(state)
         {
             std::this_thread::sleep_for(ms(std::rand() % 10));
             for(auto& obj : objs_mes)
             {
                 obj.process();
             }
-            Scheduler::perform(Scheduler::time_point_t() + ms(m_ticks_dsp));
+            perform();
+            if(size_t(double(m_time) * 1.64) > time_limit)
+            {
+                state = false;
+            }
         }
         
         thread_dsp.join();
@@ -149,9 +163,10 @@ public:
     }
     
 private:
-    size_t  m_ticks_dsp  = 0;
-    size_t  m_ticks_gui  = 0;
-    size_t  m_ticks_mes = 0;
+    std::atomic<size_t> m_time;
+    size_t m_ticks_dsp;
+    size_t m_ticks_gui;
+    size_t m_ticks_mes;
 };
 
 TEST_CASE("Scheduler 4", "[Scheduler]")
