@@ -34,7 +34,7 @@ class MessageDspObject
 public:
     MessageDspObject() : m_task([this](){callback();})
     {
-        srand(time(NULL));
+        srand(unsigned(time(NULL)));
     }
     
     void callback()
