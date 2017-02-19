@@ -24,15 +24,15 @@ namespace kiwi
 {
     namespace scheduler
     {
-        Task::Task(method_t&& m, const id_t queue_id) : m_next(nullptr), m_time(), m_process_next(nullptr), m_method(m), m_futur_next(nullptr), m_futur_time(), m_queue_id(queue_id)
+        Task::Task(method_t&& m, const id_t queue_id) : m_method(m), m_queue_id(queue_id)
         {
             
         }
         
         
-        // ==================================================================================== //
-        //                                          QUEUE                                       //
-        // ==================================================================================== //
+        // ================================================================================ //
+        //                                  SCHEDULER QUEUE                                 //
+        // ================================================================================ //
         
         void Scheduler::Queue::perform(time_point_t const time)
         {

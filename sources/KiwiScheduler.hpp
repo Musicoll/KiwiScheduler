@@ -54,16 +54,15 @@ namespace kiwi
                 to_remove = false
             };
             
-            Task*           m_next;         //! The next task in the queue.
-            time_point_t    m_time;         //! The current time of the task.
+            Task*           m_next = nullptr;           //! The next task in the queue.
+            time_point_t    m_time;                     //! The current time of the task.
             
-            Task*           m_process_next; //! The next future task in the queue.
-            method_t        m_method;       //! The method to call.
+            Task*           m_process_next = nullptr;   //! The next future task in the queue.
+            method_t        m_method;                   //! The method to call.
             
-            Task*           m_futur_next;   //! The next future task in the queue.
+            Task*           m_futur_next  = nullptr;    //! The next future task in the queue.
             time_point_t    m_futur_time;   //! The future time if it waits for the insertion.
             futur_type_t    m_futur_type;   //! The future action.
-            
             const id_t      m_queue_id;     //! The id of the queue.
             friend class Scheduler;
         };
