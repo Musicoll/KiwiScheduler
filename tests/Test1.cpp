@@ -21,7 +21,10 @@
  ==============================================================================
  */
 
-#include "TestScheduler.hpp"
+#include <atomic>
+#include <thread>
+#include "catch.hpp"
+#include "../sources/KiwiScheduler.hpp"
 
 using namespace kiwi::engine;
 #define MAX_COUNT 128
@@ -78,7 +81,7 @@ static void consumer(Scheduler* sch)
     }
 }
 
-extern int perform_test1()
+TEST_CASE("Scheduler_1", "[Scheduler]")
 {
     counter = 0;
     Scheduler sch;
@@ -87,5 +90,5 @@ extern int perform_test1()
     cons.join();
     prod.join();
     
-    return counter < MAX_COUNT;
+    CHECK(counter >= MAX_COUNT);
 }

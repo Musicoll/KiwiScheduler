@@ -21,7 +21,9 @@
  ==============================================================================
  */
 
-#include "TestScheduler.hpp"
+#include <atomic>
+#include "catch.hpp"
+#include "../sources/KiwiScheduler.hpp"
 
 using namespace kiwi::engine;
 
@@ -38,7 +40,7 @@ enum QueueId : typename Scheduler::id_t
     GuiId       = 2
 };
 
-extern int perform_test4()
+TEST_CASE("Scheduler_4", "[Scheduler]")
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
@@ -73,5 +75,5 @@ extern int perform_test4()
     sch.add(t6, clock::now() + ms(30));
     sch.perform(clock::now() + ms(80));
     
-    return counter != 8;
+    CHECK(counter == 8);
 }

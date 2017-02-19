@@ -21,7 +21,10 @@
  ==============================================================================
  */
 
-#include "TestScheduler.hpp"
+#include <atomic>
+#include <thread>
+#include "catch.hpp"
+#include "../sources/KiwiScheduler.hpp"
 #include <cstdlib>
 
 using namespace kiwi::engine;
@@ -92,8 +95,8 @@ private:
     Scheduler::Task     m_task;
 };
 
-extern int perform_test2()
+TEST_CASE("Scheduler_2", "[Scheduler]")
 {
     MessageDspObject obj;
-    return obj.run();
+    CHECK(!obj.run());
 }

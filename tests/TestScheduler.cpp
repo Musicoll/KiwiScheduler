@@ -22,16 +22,13 @@
  */
 
 
-#include <iostream>
-#include "TestScheduler.hpp"
+#define CATCH_CONFIG_RUNNER
+
+#include "catch.hpp"
 
 int main(int argc, char* const argv[])
 {
-    std::cout << "Unit-Tests - KiwiQueue...";
-    assert(perform_test1() == 0);
-    assert(perform_test2() == 0);
-    assert(perform_test3() == 0);
-    assert(perform_test4() == 0);
-    std::cout << "\n";
-    return 0;
+    std::cout << "running Unit-Tests - KiwiEngine ...\n";
+    return Catch::Session().run(argc, argv);
 }
+

@@ -21,7 +21,9 @@
  ==============================================================================
  */
 
-#include "TestScheduler.hpp"
+#include <atomic>
+#include "catch.hpp"
+#include "../sources/KiwiScheduler.hpp"
 
 using namespace kiwi::engine;
 
@@ -31,7 +33,7 @@ static void increment()
     counter++;
 }
 
-extern int perform_test3()
+TEST_CASE("Scheduler_3", "[Scheduler]")
 {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
@@ -60,5 +62,5 @@ extern int perform_test3()
     sch.add(t6, clock::now() + ms(30));
     sch.perform(clock::now() + ms(80));
     
-    return counter != 8;
+    CHECK(counter == 8);
 }
