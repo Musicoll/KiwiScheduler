@@ -10,6 +10,10 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.7)
 set(CMAKE_OSX_ARCHITECTURES "i386;x86_64")
 set(CMAKE_MACOSX_RPATH ON)
 
+if(NOT APPLE)
+find_package(Threads)
+endif()
+
 if(UNIX)
   add_definitions("-std=c++11")
   if(APPLE)
@@ -33,6 +37,9 @@ source_group(Tests FILES ${KIWI_SCHEDULER_TESTS})
 include_directories(${PROJECT_SOURCE_DIR}/tests)
 
 add_executable(KiwiSchedulerTest ${KIWI_SCHEDULER_SOURCES} ${KIWI_SCHEDULER_TESTS})
+if(NOT APPLE)
+target_link_libraries(KiwiSchedulerTest Threads::Threads)
+endif()
 
 if(${GCOV_SUPPORT} STREQUAL "On")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
