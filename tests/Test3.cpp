@@ -54,7 +54,6 @@ TEST_CASE("Scheduler 3", "[Scheduler]")
     sch.prepare(QueueId::DspId);
     sch.prepare(QueueId::EngineId);
     sch.prepare(QueueId::GuiId);
-    sch.prepare(4);
     
     Scheduler::Task t1(cnt, DspId);
     Scheduler::Task t2(cnt, EngineId);
