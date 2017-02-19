@@ -39,4 +39,4 @@ script:
   - cmake ..
   - cmake --build .
   - cd ../
-  - ./build/KiwiScheduler
+  - ./build/KiwiSchedulerTest
