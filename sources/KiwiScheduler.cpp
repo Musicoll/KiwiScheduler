@@ -22,7 +22,7 @@
 
 namespace kiwi
 {
-    namespace scheduler
+    namespace engine
     {
         Task::Task(method_t&& m, const id_t queue_id) : m_method(m), m_queue_id(queue_id)
         {

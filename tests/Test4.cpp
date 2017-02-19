@@ -23,7 +23,7 @@
 
 #include "TestScheduler.hpp"
 
-using namespace kiwi::scheduler;
+using namespace kiwi::engine;
 
 static std::atomic<size_t> counter;
 static void increment()

@@ -23,7 +23,7 @@
 
 #include "TestScheduler.hpp"
 
-using namespace kiwi::scheduler;
+using namespace kiwi::engine;
 #define MAX_COUNT 128
 static std::atomic<size_t> counter;
 

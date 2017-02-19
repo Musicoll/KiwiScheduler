@@ -24,7 +24,7 @@
 #include "TestScheduler.hpp"
 #include <cstdlib>
 
-using namespace kiwi::scheduler;
+using namespace kiwi::engine;
 
 class MessageDspObject
 {
