@@ -50,7 +50,7 @@ namespace kiwi
         private:
             enum futur_type_t : bool
             {
-                to_add = true,
+                to_add    = true,
                 to_remove = false
             };
             
@@ -68,7 +68,6 @@ namespace kiwi
             friend class Queue;
             friend class Scheduler;
         };
-        
         
         // ==================================================================================== //
         //                                      QUEUE                                           //
