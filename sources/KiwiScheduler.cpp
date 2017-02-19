@@ -240,14 +240,14 @@ namespace kiwi
             }
         }
         
-        void Scheduler::add(Task& t, time_point_t const time)
+        void Scheduler::add(Task& task, time_point_t const time)
         {
-            m_queues[t.m_queue_id].add(t, time);
+            m_queues[task.m_queue_id].add(task, time);
         }
         
-        void Scheduler::remove(Task& t)
+        void Scheduler::remove(Task& task)
         {
-            m_queues[t.m_queue_id].remove(t);
+            m_queues[task.m_queue_id].remove(task);
         }
     }
 }

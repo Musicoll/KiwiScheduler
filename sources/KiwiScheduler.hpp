@@ -114,9 +114,12 @@ namespace kiwi
         // ==================================================================================== //
         //                                      SCHEDULER                                       //
         // ==================================================================================== //
-        //! @brief The manager of queues.
-        //! @details The scheduler manages a set of queues. It a single consumer but it can
-        //! accepts several producer defined by ids.
+        //! @brief The manager of tasks.
+        //! @details The scheduler manages a set of tasks inside several queues. It a single
+        //! consumer but it can accepts several producer defined by ids, that match with
+        //! queues. So to add several events in a concurrency context, you need a use a
+        //! different id for each thread. And of course, you can use several ids inside the
+        //! same thread.
         //! @todo later we can add priorities.
         class Scheduler
         {
@@ -142,15 +145,19 @@ namespace kiwi
             void perform(time_point_t const time);
             
             //! @brief Adds a task at a specified time.
-            //! @details ....
-            //! @param t    The task to add.
+            //! @details The method performs adds a tasks of to its queues, and allocate a new
+            //! queue if needed. Only one instance of a task can be added to a queue because
+            //! the task owns its time point, so if the queue owns two instances of the same
+            //! task one of these instances won't have the right time. Therefore, the task is
+            //! removed from the queue if it has already been added and not consumed.
+            //! @param task The task to add.
             //! @param time The time point where the task should be inserted.
-            void add(Task& t, time_point_t const time);
+            void add(Task& task, time_point_t const time);
             
             //! @brief Removes a task.
             //! @details ...
-            //! @param t The task to remove.
-            void remove(Task& t);
+            //! @param task The task to remove.
+            void remove(Task& task);
             
         private:
             std::map<id_t, Queue> m_queues; //! The list of queues.
