@@ -155,7 +155,7 @@ public:
                                {
                                    while(state)
                                    {
-                                       if(std::chrono::duration_cast<ms>(clock::now() - start_time).count() > KIWI_SCHEDULER_TEST4_TIME_MAX * 10)
+                                       if(std::chrono::duration_cast<ms>(clock::now() - start_time).count() > KIWI_SCHEDULER_TEST4_TIME_MAX * 100)
                                        {
                                            state = false;
                                            valid = false;
