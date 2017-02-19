@@ -52,12 +52,12 @@ extern int perform_test4()
     counter = 0;
     Scheduler sch;
     
-    Task t1(increment, DspId);
-    Task t2(increment, EngineId);
-    Task t3(increment, DspId);
-    Task t4(increment, EngineId);
-    Task t5(increment, GuiId);
-    Task t6(increment, GuiId);
+    Scheduler::Task t1(increment, DspId);
+    Scheduler::Task t2(increment, EngineId);
+    Scheduler::Task t3(increment, DspId);
+    Scheduler::Task t4(increment, EngineId);
+    Scheduler::Task t5(increment, GuiId);
+    Scheduler::Task t6(increment, GuiId);
     
     sch.add(t1, clock::now() + ms(40));
     sch.add(t2, clock::now() + ms(20));

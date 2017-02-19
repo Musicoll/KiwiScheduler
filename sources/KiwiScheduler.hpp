@@ -31,43 +31,6 @@ namespace kiwi
     namespace engine
     {
         // ================================================================================ //
-        //                                      TASK                                        //
-        // ================================================================================ //
-        //! @brief The task that can be added to a queue.
-        //! @details Perhaps we should manage a pointer to pass to the method...
-        class Task
-        {
-        public:
-            using id_t              = uint32_t;
-            using method_t          = std::function<void()>; 
-            using time_point_t      = std::chrono::high_resolution_clock::time_point;
-
-            //! @brief the constructor.
-            //! @param m The method to call.
-            //! @param queue_id The id of the queue in wich it will be added.
-            Task(method_t&& m, const id_t queue_id = 0);
-            
-        private:
-            enum futur_type_t : bool
-            {
-                to_add    = true,
-                to_remove = false
-            };
-            
-            Task*           m_next = nullptr;           //! The next task in the queue.
-            time_point_t    m_time;                     //! The current time of the task.
-            
-            Task*           m_process_next = nullptr;   //! The next future task in the queue.
-            method_t        m_method;                   //! The method to call.
-            
-            Task*           m_futur_next  = nullptr;    //! The next future task in the queue.
-            time_point_t    m_futur_time;   //! The future time if it waits for the insertion.
-            futur_type_t    m_futur_type;   //! The future action.
-            const id_t      m_queue_id;     //! The id of the queue.
-            friend class Scheduler;
-        };
-        
-        // ================================================================================ //
         //                                      SCHEDULER                                   //
         // ================================================================================ //
         //! @brief The manager of tasks.
@@ -80,8 +43,43 @@ namespace kiwi
         class Scheduler
         {
         public:
-            using time_point_t = Task::time_point_t; //! The type for time point.
-            using id_t         = Task::id_t;         //! The type for the ID of a queue.
+            using id_t              = uint32_t;
+            using method_t          = std::function<void()>;
+            using time_point_t      = std::chrono::high_resolution_clock::time_point;
+            
+            // ============================================================================ //
+            //                                      TASK                                    //
+            // ============================================================================ //
+            //! @brief The task that can be added to a scheduler.
+            //! @todo Perhaps we should manage a pointer to pass to the method...
+            class Task
+            {
+            public:
+                
+                //! @brief the constructor.
+                //! @param m The method to call.
+                //! @param queue_id The id of the queue in wich it will be added.
+                Task(method_t&& m, const id_t queue_id = 0) : m_method(m), m_queue_id(queue_id) {}
+                
+            private:
+                enum futur_type_t : bool
+                {
+                    to_add    = true,
+                    to_remove = false
+                };
+                
+                Task*           m_next = nullptr;           //!< The next task in the queue.
+                time_point_t    m_time;                     //!< The current time of the task.
+                
+                Task*           m_process_next = nullptr;   //!< The next future task in the queue.
+                method_t        m_method;                   //!< The method to call.
+                
+                Task*           m_futur_next  = nullptr;    //!< The next future task in the queue.
+                time_point_t    m_futur_time;   //!< The future time if it waits for the insertion.
+                futur_type_t    m_futur_type;   //!< The future action.
+                const id_t      m_queue_id;     //!< The id of the queue.
+                friend class Scheduler;
+            };
             
             //! @brief Prepare the scheduler for a specific queue.
             //! @details If a queue has never been used, the first use of queue calls its
@@ -153,13 +151,13 @@ namespace kiwi
                 void remove(Task& task);
                 
             private:
-                Task*           m_main  = nullptr;  //! The main sorted linked list of tasks.
-                Task*           m_futur = nullptr;  //! The linked list of tasks that will be inserted.
-                std::mutex      m_main_mutex;       //! The main list mutex.
-                std::mutex      m_futur_mutex;      //! The futur list mutex.
+                Task*           m_main  = nullptr;  //!< The main sorted linked list of tasks.
+                Task*           m_futur = nullptr;  //!< The linked list of tasks that will be inserted.
+                std::mutex      m_main_mutex;       //!< The main list mutex.
+                std::mutex      m_futur_mutex;      //!< The futur list mutex.
             };
             
-            std::map<id_t, Queue> m_queues; //! The list of queues.
+            std::map<id_t, Queue> m_queues; //!< The list of queues.
         };
     }
 }

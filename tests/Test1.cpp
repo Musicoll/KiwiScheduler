@@ -49,7 +49,7 @@ static void increment()
 static void producer(Scheduler* sch)
 {
     size_t index = 0;
-    std::vector<Task> tasks(MAX_COUNT, Task(increment));
+    std::vector<Scheduler::Task> tasks(MAX_COUNT, Scheduler::Task(increment));
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::high_resolution_clock;
     while(counter < MAX_COUNT)

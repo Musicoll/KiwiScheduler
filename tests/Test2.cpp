@@ -89,7 +89,7 @@ private:
     size_t              m_counter;
     std::atomic<size_t> m_ndspticks;
     Scheduler           m_scheduler;
-    Task                m_task;
+    Scheduler::Task     m_task;
 };
 
 extern int perform_test2()

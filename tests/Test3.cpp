@@ -39,12 +39,12 @@ extern int perform_test3()
     counter = 0;
     Scheduler sch;
     
-    Task t1(increment);
-    Task t2(increment);
-    Task t3(increment);
-    Task t4(increment);
-    Task t5(increment);
-    Task t6(increment);
+    Scheduler::Task t1(increment);
+    Scheduler::Task t2(increment);
+    Scheduler::Task t3(increment);
+    Scheduler::Task t4(increment);
+    Scheduler::Task t5(increment);
+    Scheduler::Task t6(increment);
     
     sch.add(t1, clock::now() + ms(40));
     sch.add(t2, clock::now() + ms(20));
