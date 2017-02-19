@@ -79,8 +79,8 @@ namespace kiwi
                     m_futur = m_futur->m_futur_next;
                     Task::futur_type_t operation = current->m_futur_type;
                     current->m_futur_type = Task::futur_type_t::available;
+                    current->m_futur_next = nullptr;
                     m_futur_mutex.unlock();
-                    /*
                     if(operation == Task::futur_type_t::to_add)
                     {
                         add(*current, current->m_futur_time);
@@ -89,7 +89,6 @@ namespace kiwi
                     {
                         remove(*current);
                     }
-                     */
                     m_futur_mutex.lock();
                 }
                 m_futur_mutex.unlock();
