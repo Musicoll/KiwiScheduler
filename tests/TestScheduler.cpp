@@ -33,7 +33,13 @@ namespace kiwi
         //                                      OBJECT                                      //
         // ================================================================================ //
         Object::Object(Instance& instance, Types threadid) :
-        m_instance(instance), m_task(*this, threadid)
+        m_instance(instance), m_task(*this, threadid), m_type(threadid)
+        {
+            
+        }
+        
+        Object::Object(Object const& o) :
+        m_instance(o.m_instance), m_task(*this, o.m_type), m_type(o.m_type)
         {
             
         }
@@ -65,7 +71,7 @@ namespace kiwi
         public:
             Message(Instance& instance) : Object(instance, Types::Main) {}
             void process() override {
-                if((m_state = !m_state)%2) {
+                if((m_state = !m_state)) {
                     defer(Ms(std::rand() % 20));
                 }
                 else {
@@ -99,7 +105,7 @@ namespace kiwi
         public:
             High(Instance& instance) : Object(instance, Types::High) {}
             void process() override {
-                if((m_state = !m_state)%2) {
+                if((m_state = !m_state)) {
                     defer(Ms(std::rand() % 20));
                 }
                 else {

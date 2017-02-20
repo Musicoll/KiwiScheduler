@@ -57,6 +57,7 @@ namespace kiwi
             };
                 
             Object(Instance& instance, Types threadid);
+            Object(Object const& o);
             virtual ~Object();
             void defer(Ms const time);
             void remove();
@@ -66,6 +67,7 @@ namespace kiwi
         private:
             Instance& m_instance;
             Task      m_task;
+            Types     m_type;
         };
         
         // ================================================================================ //
