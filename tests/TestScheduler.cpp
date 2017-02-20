@@ -137,7 +137,7 @@ namespace kiwi
             m_data_mutex.unlock();
         }
         
-        void Instance::run()
+        void Instance::run(Ms const time)
         {
             m_time      = 0;
             
@@ -153,9 +153,7 @@ namespace kiwi
             Scheduler::prepare(Object::Types::Main);
             Scheduler::prepare(Object::Types::High);
             
-            //auto start_time = Clock::now();
-            
-            std::thread thread_dsp([this, &state, &objs_dsp]()
+            std::thread thread_dsp([this, &state, &objs_dsp, &time]()
                                    {
                                        while(state)
                                        {
@@ -164,7 +162,7 @@ namespace kiwi
                                                obj.process();
                                            }
                                            ++m_time;
-                                           state = m_time.load() < 1000;
+                                           state = m_time.load() < size_t(time.count());
                                            std::this_thread::sleep_for(Ms(1));
                                        }
                                    });
@@ -209,6 +207,7 @@ namespace kiwi
             thread_dsp.join();
             thread_gui.join();
             thread_high.join();
+            Scheduler::perform(m_time.load()+size_t(time.count()));
         }
     }
 }
@@ -217,13 +216,14 @@ namespace kiwi
 
 int main(int argc, char* const argv[])
 {
-    std::cout << "running Unit-Tests - KiwiScheduler ...";
+    std::cout << "running Unit-Tests - KiwiScheduler...";
     kiwi::engine::Instance instance;
-    instance.run();
-    instance.run();
-    instance.run();
-    instance.run();
-    instance.run();
+    kiwi::engine::Instance::Ms t(1000);
+    instance.run(t);
+    instance.run(t);
+    instance.run(t);
+    instance.run(t);
+    instance.run(t);
     std::cout << "ok\n";
     return 0;
 }

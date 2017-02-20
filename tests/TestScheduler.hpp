@@ -84,7 +84,7 @@ namespace kiwi
             void defer(Task& task, Ms const time);
             void remove(Task& task);
             void access();
-            void run();
+            void run(Ms const time);
         private:
             
             std::atomic<size_t> m_time;
