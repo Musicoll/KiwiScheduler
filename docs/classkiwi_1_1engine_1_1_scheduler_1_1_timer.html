@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>KiwiScheduler: Class Members</title>
+<title>KiwiScheduler: Scheduler::Timer Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,16 +62,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
-      <li class="current"><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
-  <div id="navrow3" class="tabs2">
-    <ul class="tablist">
-      <li class="current"><a href="functions.html"><span>All</span></a></li>
-      <li><a href="functions_func.html"><span>Functions</span></a></li>
-    </ul>
-  </div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -86,31 +79,37 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><b>kiwi</b></li><li class="navelem"><b>engine</b></li><li class="navelem"><a class="el" href="classkiwi_1_1engine_1_1_scheduler.html">Scheduler</a></li><li class="navelem"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html">Timer</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="classkiwi_1_1engine_1_1_scheduler_1_1_timer-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">Scheduler::Timer Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
+</div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all documented class members with links to the class documentation for each member:</div><ul>
-<li>add()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler.html#ade288bfbeda4e4d77b70e290f03472d6">Scheduler</a>
-</li>
-<li>callback()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#a0a7a1fa5fa8d3447fe46ecd0a13ea96b">Scheduler::Timer</a>
-</li>
-<li>perform()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler.html#afbb677d663a5928a0d086d4f3f613fca">Scheduler</a>
-</li>
-<li>prepare()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler.html#a824ac247c71777955f3c22abe7fb3146">Scheduler</a>
-</li>
-<li>remove()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler.html#a4e43b18c329a7b0afd6cfa3ebca98893">Scheduler</a>
-</li>
-<li>Task()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html#a5fe0f6f814fd0e180811fee196ed52ae">Scheduler::Task</a>
-</li>
-<li>~Timer()
-: <a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#a7837d31d1aeda174eb9e3fdb625a73f5">Scheduler::Timer</a>
-</li>
-</ul>
-</div><!-- contents -->
+
+<p>The timer is the pure virtual class that used by task.  
+ <a href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a7837d31d1aeda174eb9e3fdb625a73f5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7837d31d1aeda174eb9e3fdb625a73f5"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#a7837d31d1aeda174eb9e3fdb625a73f5">~Timer</a> ()</td></tr>
+<tr class="memdesc:a7837d31d1aeda174eb9e3fdb625a73f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The destructor. <br /></td></tr>
+<tr class="separator:a7837d31d1aeda174eb9e3fdb625a73f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a7a1fa5fa8d3447fe46ecd0a13ea96b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0a7a1fa5fa8d3447fe46ecd0a13ea96b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#a0a7a1fa5fa8d3447fe46ecd0a13ea96b">callback</a> ()=0</td></tr>
+<tr class="memdesc:a0a7a1fa5fa8d3447fe46ecd0a13ea96b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The callback method. <br /></td></tr>
+<tr class="separator:a0a7a1fa5fa8d3447fe46ecd0a13ea96b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The timer is the pure virtual class that used by task. </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

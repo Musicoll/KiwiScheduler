@@ -103,18 +103,18 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html">Task</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The task that can be added to a scheduler.  <a href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html">Timer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The timer is the pure virtual class that used by task.  <a href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a13d72696c97d00a1e3b389d739237718"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a13d72696c97d00a1e3b389d739237718"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>id_t</b> = uint32_t</td></tr>
 <tr class="separator:a13d72696c97d00a1e3b389d739237718"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9da1271241625255b4c6fb51ea5b84ea"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9da1271241625255b4c6fb51ea5b84ea"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>method_t</b> = std::function&lt; void()&gt;</td></tr>
-<tr class="separator:a9da1271241625255b4c6fb51ea5b84ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d3292c96f2e86b6a42e218aafd18d8d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d3292c96f2e86b6a42e218aafd18d8d"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>time_point_t</b> = std::chrono::high_resolution_clock::time_point</td></tr>
-<tr class="separator:a4d3292c96f2e86b6a42e218aafd18d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a323fd58850db2f549f67839e3aaac825"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a323fd58850db2f549f67839e3aaac825"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>time_point_t</b> = size_t</td></tr>
+<tr class="separator:a323fd58850db2f549f67839e3aaac825"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -160,7 +160,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Adds a task at a specified time. </p>
-<p>The method performs adds a tasks of to its queues, and allocate a new queue if needed. Only one instance of a task can be added to a queue because the task owns its time point, so if the queue owns two instances of the same task one of these instances won't have the right time. Therefore, the task is removed from the queue if it has already been added and not consumed. The task is already defined by a queue's id, so at the end only one instance of a task can be added to a scheduler. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The method performs adds a task of to its queues, and allocate a new queue if needed. Only one instance of a task can be added to a queue because the task owns its time point, so if the queue owns two instances of the same task one of these instances won't have the right time. Therefore, the task is removed from the queue if it has already been added and not consumed. The task is already defined by a queue's id, so at the end only one instance of a task can be added to a scheduler. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">task</td><td>The task to add. </td></tr>
     <tr><td class="paramname">time</td><td>The time point where the task should be inserted. </td></tr>
@@ -234,7 +234,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Removes a task. </p>
-<p>... </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This method removes a task from its queue. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">task</td><td>The task to remove. </td></tr>
   </table>

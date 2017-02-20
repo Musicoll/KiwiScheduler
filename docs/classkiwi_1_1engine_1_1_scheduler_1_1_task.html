@@ -87,6 +87,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classkiwi_1_1engine_1_1_scheduler_1_1_task-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Scheduler::Task Class Reference</div>  </div>
@@ -98,15 +99,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a81bb69312f1d3061403218db7acb8c99"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html#a81bb69312f1d3061403218db7acb8c99">Task</a> (method_t &amp;&amp;m, const id_t queue_id=0)</td></tr>
-<tr class="memdesc:a81bb69312f1d3061403218db7acb8c99"><td class="mdescLeft">&#160;</td><td class="mdescRight">the constructor.  <a href="#a81bb69312f1d3061403218db7acb8c99">More...</a><br /></td></tr>
-<tr class="separator:a81bb69312f1d3061403218db7acb8c99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fe0f6f814fd0e180811fee196ed52ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html#a5fe0f6f814fd0e180811fee196ed52ae">Task</a> (<a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html">Timer</a> &amp;master, const id_t queue_id=0)</td></tr>
+<tr class="memdesc:a5fe0f6f814fd0e180811fee196ed52ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">the constructor.  <a href="#a5fe0f6f814fd0e180811fee196ed52ae">More...</a><br /></td></tr>
+<tr class="separator:a5fe0f6f814fd0e180811fee196ed52ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:afb88c77ea5daaefa6c8fa6bc5b9aa5c1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afb88c77ea5daaefa6c8fa6bc5b9aa5c1"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>Scheduler</b></td></tr>
+<tr class="separator:afb88c77ea5daaefa6c8fa6bc5b9aa5c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The task that can be added to a scheduler. </p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Perhaps we should manage a pointer to pass to the method... </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a81bb69312f1d3061403218db7acb8c99"></a>
+<a class="anchor" id="a5fe0f6f814fd0e180811fee196ed52ae"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -116,8 +123,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_task.html">Task</a> </td>
           <td>(</td>
-          <td class="paramtype">method_t &amp;&amp;&#160;</td>
-          <td class="paramname"><em>m</em>, </td>
+          <td class="paramtype"><a class="el" href="classkiwi_1_1engine_1_1_scheduler_1_1_timer.html">Timer</a> &amp;&#160;</td>
+          <td class="paramname"><em>master</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -141,7 +148,7 @@ Public Member Functions</h2></td></tr>
 <p>the constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">m</td><td>The method to call. </td></tr>
+    <tr><td class="paramname">master</td><td>The method to call. </td></tr>
     <tr><td class="paramname">queue_id</td><td>The id of the queue in wich it will be added. </td></tr>
   </table>
   </dd>

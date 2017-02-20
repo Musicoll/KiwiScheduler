@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7equeue',['~Queue',['../classkiwi_1_1scheduler_1_1_queue.html#a240bdcfcc136e53aeaac3aa454cc26bf',1,'kiwi::scheduler::Queue']]]
+  ['_7etimer',['~Timer',['../classkiwi_1_1engine_1_1_scheduler_1_1_timer.html#a7837d31d1aeda174eb9e3fdb625a73f5',1,'kiwi::engine::Scheduler::Timer']]]
 ];
