@@ -227,7 +227,7 @@ namespace kiwi
                     task.m_futur_next = m_futur;
                     m_futur = &task;
                 }
-                task.m_futur_time = time_point_t::min();
+                task.m_futur_time = 0;
                 task.m_futur_type = Task::futur_type_t::to_remove;
             }
         }

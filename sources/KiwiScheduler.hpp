@@ -43,7 +43,7 @@ namespace kiwi
         {
         public:
             using id_t              = uint32_t;
-            using time_point_t      = std::chrono::high_resolution_clock::time_point;
+            using time_point_t      = size_t;
             
             // ============================================================================ //
             //                                      TIMER                                   //
