@@ -112,7 +112,7 @@ namespace kiwi
             void perform(time_point_t const time);
             
             //! @brief Adds a task at a specified time.
-            //! @details The method performs adds a tasks of to its queues, and allocate a new
+            //! @details The method performs adds a task of to its queues, and allocate a new
             //! queue if needed. Only one instance of a task can be added to a queue because
             //! the task owns its time point, so if the queue owns two instances of the same
             //! task one of these instances won't have the right time. Therefore, the task is
@@ -124,7 +124,7 @@ namespace kiwi
             void add(Task& task, time_point_t const time);
             
             //! @brief Removes a task.
-            //! @details ...
+            //! @details This method removes a task from its queue. 
             //! @param task The task to remove.
             void remove(Task& task);
             
