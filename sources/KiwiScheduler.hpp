@@ -191,7 +191,7 @@ namespace kiwi
         {
         public:
             
-            Command(Callback& c) : m_callback(c), m_state({Status::available, nullptr}) {}
+            Command(Callback& c) : m_callback(c), m_state(Status::available), m_next(nullptr) {}
         private:
             enum Status : unsigned
             {
@@ -200,14 +200,9 @@ namespace kiwi
                 removed   = 2
             };
             
-            struct internal_t
-            {
-                Status   state;
-                Command* next;
-            };
-            
-            Callback&               m_callback;
-            std::atomic<internal_t> m_state;
+            Callback&           m_callback;
+            std::atomic<Status> m_state;
+            Command*            m_next;
             friend class List;
         };
     
