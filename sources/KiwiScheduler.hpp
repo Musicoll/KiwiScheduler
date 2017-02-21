@@ -52,6 +52,7 @@ namespace kiwi
             class Timer
             {
             public:
+                
                 //! @brief The destructor
                 virtual ~Timer() {}
                 
@@ -171,38 +172,76 @@ namespace kiwi
                 std::mutex      m_futur_mutex;      //!< The futur list mutex.
             };
             
-            // ============================================================================ //
-            //                                  SCHEDULER LIST                              //
-            // ============================================================================ //
-            class List
+            std::map<id_t, Queue> m_queues; //!< The list of queues.
+        };
+        
+        
+        class Callback
+        {
+        public:
+            
+            //! @brief The destructor
+            virtual ~Callback() {}
+            
+            //! @brief The callback method
+            virtual void call() = 0;
+        };
+        
+        class Command
+        {
+        public:
+            
+            Command(Callback& c) : m_callback(c), m_state({Status::available, nullptr}) {}
+        private:
+            enum Status : unsigned
             {
-            public:
-                //! @brief Performs all the tasks.
-                //! @details The method calls all the task before.
-                void perform();
-                
-                //! @brief Adds a task.
-                //! @details Only one instance of a task can be added to the list to ensure
-                //! consistency with the queu. Therefore, the task is removed from the queue
-                //! if it has already been added and not consumed.
-                //! @param task The task to add.
-                void add(Task& task);
-                
-                //! @brief Removes a task.
-                //! @details This method is also lock free but for lock reasons, the method
-                //! can't be used by the add method.
-                //! @param task The task to remove.
-                void remove(Task& task);
-            private:
-                Task*      m_main_head = nullptr;   //!< The pointer to the head of the list.
-                Task*      m_main_tail = nullptr;   //!< The pointer to the tail of the list.
-                std::mutex m_main_mutex;            //!< The main list mutex.
-                Task*      m_futur_head = nullptr;  //!< The pointer to the head of the list.
-                Task*      m_futur_tail = nullptr;  //!< The pointer to the tail of the list.
-                std::mutex m_futur_mutex;           //!< The futur list mutex.
+                available = 0,
+                inserted  = 1,
+                removed   = 2
             };
             
-            std::map<id_t, Queue> m_queues; //!< The list of queues.
+            struct internal_t
+            {
+                Status   state;
+                Command* next;
+            };
+            
+            Callback&               m_callback;
+            std::atomic<internal_t> m_state;
+            friend class List;
+        };
+    
+        // ============================================================================ //
+        //                                  SCHEDULER LIST                              //
+        // ============================================================================ //
+        class List
+        {
+            // Une tache n'est pas vraiment enlevée avant la fonction perform
+        public:
+            //! @brief Performs all the tasks.
+            //! @details The method calls all the task before.
+            void perform();
+            
+            //! @brief Adds a task.
+            //! @details Only one instance of a task can be added to the list to ensure
+            //! consistency with the queu. Therefore, the task is removed from the queue
+            //! if it has already been added and not consumed.
+            //! @param task The task to add.
+            void add(Command& task);
+            
+            //! @brief Removes a task.
+            //! @details This method is also lock free but for lock reasons, the method
+            //! can't be used by the add method.
+            //! @param task The task to remove.
+            void remove(Command& task, bool sequential);
+        private:
+            struct double_ptr_list_t
+            {
+                Command* head;
+                Command* tail;
+            };
+            
+            std::atomic<double_ptr_list_t> m_list;
         };
     }
 }

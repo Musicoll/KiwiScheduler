@@ -233,90 +233,6 @@ namespace kiwi
         }
         
         // ================================================================================ //
-        //                                  SCHEDULER LIST                                  //
-        // ================================================================================ //
-
-        void Scheduler::List::perform()
-        {
-            Task* head = nullptr;
-            {
-                std::lock_guard<std::mutex> guard(m_main_mutex);
-                head = m_main_head;
-                m_main_head = m_main_tail = nullptr;
-            }
-            {
-                // Locks the mutex of the list of futures tasks. If tasks are added or removed
-                // during this lock, they managed directly by the main list or recursively
-                // added to this list until the main lock is free.
-                m_futur_mutex.lock();
-                while(m_futur_head)
-                {
-                    Task *current = m_futur_head;
-                    Task::Status operation = current->m_status;
-                    
-                    m_futur_head = m_futur_head->m_futur_next;
-                    current->m_status = Task::Status::available;
-                    current->m_futur_next = nullptr;
-                    
-                    m_futur_mutex.unlock();
-                    if(operation == Task::Status::to_add)
-                    {
-                        add(*current);
-                    }
-                    else if(operation == Task::Status::to_remove)
-                    {
-                        remove(*current);
-                    }
-                    m_futur_mutex.lock();
-                }
-                m_futur_mutex.unlock();
-            }
-            
-            while(head)
-            {
-                head->m_timer.callback();
-                head->m_status = Task::Status::available;
-                head = head->m_process_next;
-            }
-        }
-        
-        void Scheduler::List::add(Task& task)
-        {
-            if(task.m_status != Task::Status::inserted && m_main_mutex.try_lock())
-            {
-                task.m_status = Task::Status::inserted;
-                if(m_main_tail)
-                {
-                    m_main_tail->m_next = &task;
-                }
-                else
-                {
-                    m_main_head = &task;
-                }
-                m_main_tail = &task;
-            }
-            else
-            {
-                std::lock_guard<std::mutex> guard(m_futur_mutex);
-                task.m_status = Task::Status::to_add;
-                if(m_futur_tail)
-                {
-                    m_futur_tail->m_next = &task;
-                }
-                else
-                {
-                    m_futur_head = &task;
-                }
-                m_futur_tail = &task;
-            }
-        }
-        
-        void Scheduler::List::remove(Task& task)
-        {
-            
-        }
-        
-        // ================================================================================ //
         //                                      SCHEDULER                                   //
         // ================================================================================ //
         
@@ -341,6 +257,65 @@ namespace kiwi
         void Scheduler::remove(Task& task)
         {
             m_queues[task.m_queue_id].remove(task);
+        }
+        
+        
+        
+        
+        // ================================================================================ //
+        //                                  SCHEDULER LIST                                  //
+        // ================================================================================ //
+        
+        void List::perform()
+        {
+            // Retrieves the list of tasks in a
+            // local tempory pointer and sets
+            // the member list to null.
+            Command* head = m_list.exchange(double_ptr_list_t{nullptr, nullptr}).head;
+            while(head)
+            {
+                // Calls the callback method of the
+                // task if its status is inserted,
+                // otherwise set the status available
+                Command* next = head->m_next;
+                Command::Status state_inserted  = Command::Status::inserted;
+                if(head->m_state.compare_exchange_strong(state_inserted, Command::Status::available))
+                {
+                    head->m_callback.call();
+                }
+                else
+                {
+                    head->m_state.store(Command::Status::available);
+                }
+                // Retrieves the next task
+                head = next;
+            }
+        }
+        
+        void List::add(Command& task)
+        {
+            Command::Status state_available = Command::Status::available;
+            Command::Status state_removed   = Command::Status::removed;
+            if(task.m_state.compare_exchange_strong(state_available, Command::Status::inserted))
+            {
+                task.m_next = nullptr;
+                double_ptr_list_t empty_list{nullptr, nullptr};
+                if(!m_list.compare_exchange_strong(empty_list, double_ptr_list_t({&task, &task})))
+                {
+                    // Perhaps here it's not lock free.
+                    m_list.load().tail->m_next = &task;
+                }
+            }
+            else
+            {
+                task.m_state.compare_exchange_strong(state_removed, Command::Status::inserted);
+            }
+        }
+        
+        void List::remove(Command& task, bool sequential)
+        {
+            Command::Status state_inserted = Command::Status::inserted;
+            task.m_state.compare_exchange_strong(state_inserted, Command::Status::removed);
         }
     }
 }
