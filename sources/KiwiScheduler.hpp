@@ -191,7 +191,7 @@ namespace kiwi
         {
         public:
             
-            Command(Callback& c) : m_callback(c), m_state(Status::available), m_next(nullptr) {}
+            Command(Callback& c) : m_callback(c), m_internal({Status::available, nullptr}) {}
         private:
             enum Status : unsigned
             {
@@ -200,9 +200,14 @@ namespace kiwi
                 removed   = 2
             };
             
-            Callback&           m_callback;
-            std::atomic<Status> m_state;
-            Command*            m_next;
+            struct internal_t
+            {
+                Status   state;
+                Command* next;
+            };
+            
+            Callback&               m_callback;
+            std::atomic<internal_t> m_internal;
             friend class List;
         };
     
@@ -213,6 +218,7 @@ namespace kiwi
         {
             // Une tache n'est pas vraiment enlevée avant la fonction perform
         public:
+            
             //! @brief Performs all the tasks.
             //! @details The method calls all the task before.
             void perform();
@@ -228,8 +234,9 @@ namespace kiwi
             //! @details This method is also lock free but for lock reasons, the method
             //! can't be used by the add method.
             //! @param task The task to remove.
-            void remove(Command& task, bool sequential);
+            void remove(Command& task, bool direct = true);
         private:
+            using Status = Command::Status;
             struct double_ptr_list_t
             {
                 Command* head;
@@ -237,6 +244,7 @@ namespace kiwi
             };
             
             std::atomic<double_ptr_list_t> m_list;
+            std::mutex                     m_mutex; // pas de ça
         };
     }
 }

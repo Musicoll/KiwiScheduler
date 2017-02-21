@@ -271,21 +271,22 @@ namespace kiwi
             // Retrieves the list of tasks in a
             // local tempory pointer and sets
             // the member list to null.
+            std::lock_guard<std::mutex> guard(m_mutex);
             Command* head = m_list.exchange(double_ptr_list_t{nullptr, nullptr}).head;
             while(head)
             {
                 // Calls the callback method of the
                 // task if its status is inserted,
                 // otherwise set the status available
-                Command* next = head->m_next;
-                Command::Status state_inserted  = Command::Status::inserted;
-                if(head->m_state.compare_exchange_strong(state_inserted, Command::Status::available))
+                Command* next = head->m_internal.load().next;
+                Command::internal_t expected({Status::inserted, next});
+                if(head->m_internal.compare_exchange_strong(expected, Command::internal_t({Status::available, nullptr})))
                 {
                     head->m_callback.call();
                 }
                 else
                 {
-                    head->m_state.store(Command::Status::available);
+                    head->m_internal.store(Command::internal_t({Status::available, nullptr}));
                 }
                 // Retrieves the next task
                 head = next;
@@ -294,28 +295,43 @@ namespace kiwi
         
         void List::add(Command& task)
         {
-            Command::Status state_available = Command::Status::available;
-            Command::Status state_removed   = Command::Status::removed;
-            if(task.m_state.compare_exchange_strong(state_available, Command::Status::inserted))
+            Command::internal_t state_available({Status::available, nullptr});
+            if(task.m_internal.compare_exchange_strong(state_available, Command::internal_t({Status::inserted, nullptr})))
             {
-                task.m_next = nullptr;
                 double_ptr_list_t empty_list{nullptr, nullptr};
                 if(!m_list.compare_exchange_strong(empty_list, double_ptr_list_t({&task, &task})))
                 {
                     // Perhaps here it's not lock free.
-                    m_list.load().tail->m_next = &task;
+                    m_list.load().tail->m_internal.store(Command::internal_t({Status::inserted, &task}));
                 }
             }
             else
             {
-                task.m_state.compare_exchange_strong(state_removed, Command::Status::inserted);
+                Command::internal_t state_removed({Command::Status::removed, task.m_internal.load().next});
+                task.m_internal.compare_exchange_strong(state_removed, Command::internal_t({Status::inserted, task.m_internal.load().next}));
             }
         }
         
-        void List::remove(Command& task, bool sequential)
+        void List::remove(Command& task, bool direct)
         {
-            Command::Status state_inserted = Command::Status::inserted;
-            task.m_state.compare_exchange_strong(state_inserted, Command::Status::removed);
+            Command::internal_t state_inserted({Status::inserted, task.m_internal.load().next});
+            task.m_internal.compare_exchange_strong(state_inserted, Command::internal_t({Status::removed, task.m_internal.load().next}));
+            if(direct)
+            {
+                std::lock_guard<std::mutex> guard(m_mutex);
+                Command* prev = nullptr;
+                Command* head = m_list.load().head;
+                while(head)
+                {
+                    if(head == &task)
+                    {
+                        prev->m_internal.store(Command::internal_t({prev->m_internal.load().state, head->m_internal.load().next}));
+                        return;
+                    }
+                    prev = head;
+                    head = head->m_internal.load().next;
+                }
+            }
         }
     }
 }
