@@ -74,11 +74,12 @@ namespace kiwi
                 Task(Timer& master, const id_t queue_id = 0) : m_timer(master), m_queue_id(queue_id) {}
                 
             private:
-                enum futur_type_t : unsigned
+                enum Status : unsigned
                 {
                     available = 0,
-                    to_add    = 1,
-                    to_remove = 2
+                    inserted  = 1,
+                    to_add    = 2,
+                    to_remove = 3
                 };
                 
                 Task*           m_next = nullptr;           //!< The next task in the queue.
@@ -89,7 +90,7 @@ namespace kiwi
                 
                 Task*           m_futur_next  = nullptr;    //!< The next future task in the queue.
                 time_point_t    m_futur_time;   //!< The future time if it waits for the insertion.
-                futur_type_t    m_futur_type = futur_type_t::available;   //!< The future action.
+                Status          m_status      = Status::available;   //!< The future action.
                 const id_t      m_queue_id;     //!< The id of the queue.
                 friend class Scheduler;
             };
@@ -168,6 +169,37 @@ namespace kiwi
                 Task*           m_futur = nullptr;  //!< The linked list of tasks that will be inserted.
                 std::mutex      m_main_mutex;       //!< The main list mutex.
                 std::mutex      m_futur_mutex;      //!< The futur list mutex.
+            };
+            
+            // ============================================================================ //
+            //                                  SCHEDULER LIST                              //
+            // ============================================================================ //
+            class List
+            {
+            public:
+                //! @brief Performs all the tasks.
+                //! @details The method calls all the task before.
+                void perform();
+                
+                //! @brief Adds a task.
+                //! @details Only one instance of a task can be added to the list to ensure
+                //! consistency with the queu. Therefore, the task is removed from the queue
+                //! if it has already been added and not consumed.
+                //! @param task The task to add.
+                void add(Task& task);
+                
+                //! @brief Removes a task.
+                //! @details This method is also lock free but for lock reasons, the method
+                //! can't be used by the add method.
+                //! @param task The task to remove.
+                void remove(Task& task);
+            private:
+                Task*      m_main_head = nullptr;   //!< The pointer to the head of the list.
+                Task*      m_main_tail = nullptr;   //!< The pointer to the tail of the list.
+                std::mutex m_main_mutex;            //!< The main list mutex.
+                Task*      m_futur_head = nullptr;  //!< The pointer to the head of the list.
+                Task*      m_futur_tail = nullptr;  //!< The pointer to the tail of the list.
+                std::mutex m_futur_mutex;           //!< The futur list mutex.
             };
             
             std::map<id_t, Queue> m_queues; //!< The list of queues.

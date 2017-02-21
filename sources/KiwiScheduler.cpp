@@ -77,15 +77,15 @@ namespace kiwi
                 {
                     Task *current = m_futur;
                     m_futur = m_futur->m_futur_next;
-                    Task::futur_type_t operation = current->m_futur_type;
-                    current->m_futur_type = Task::futur_type_t::available;
+                    Task::Status operation = current->m_status;
+                    current->m_status = Task::Status::available;
                     current->m_futur_next = nullptr;
                     m_futur_mutex.unlock();
-                    if(operation == Task::futur_type_t::to_add)
+                    if(operation == Task::Status::to_add)
                     {
                         add(*current, current->m_futur_time);
                     }
-                    else if(operation == Task::futur_type_t::to_remove)
+                    else if(operation == Task::Status::to_remove)
                     {
                         remove(*current);
                     }
@@ -112,7 +112,7 @@ namespace kiwi
             if(m_main_mutex.try_lock())
             {
                 task.m_time = time;
-                task.m_futur_type = Task::futur_type_t::available;
+                task.m_status = Task::Status::available;
                 if(m_main)
                 {
                     // First remove the task if the task is already in the main list
@@ -180,13 +180,13 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                if(task.m_futur_type == Task::futur_type_t::available)
+                if(task.m_status == Task::Status::available)
                 {
                     task.m_futur_next = m_futur;
                     m_futur = &task;
                 }
                 task.m_futur_time = time;
-                task.m_futur_type = Task::futur_type_t::to_add;
+                task.m_status = Task::Status::to_add;
             }
         }
         
@@ -194,7 +194,7 @@ namespace kiwi
         {
             if(m_main_mutex.try_lock())
             {
-                task.m_futur_type = Task::futur_type_t::available;
+                task.m_status = Task::Status::available;
                 if(m_main)
                 {
                     if(m_main == &task)
@@ -222,13 +222,92 @@ namespace kiwi
             else
             {
                 std::lock_guard<std::mutex> lock(m_futur_mutex);
-                if(task.m_futur_type == Task::futur_type_t::available)
+                if(task.m_status == Task::Status::available)
                 {
                     task.m_futur_next = m_futur;
                     m_futur = &task;
                 }
                 task.m_futur_time = 0;
-                task.m_futur_type = Task::futur_type_t::to_remove;
+                task.m_status = Task::Status::to_remove;
+            }
+        }
+        
+        // ================================================================================ //
+        //                                  SCHEDULER LIST                                  //
+        // ================================================================================ //
+
+        void Scheduler::List::perform()
+        {
+            Task* head = nullptr;
+            {
+                std::lock_guard<std::mutex> guard(m_main_mutex);
+                head = m_main_head;
+                m_main_head = m_main_tail = nullptr;
+            }
+            {
+                // Locks the mutex of the list of futures tasks. If tasks are added or removed
+                // during this lock, they managed directly by the main list or recursively
+                // added to this list until the main lock is free.
+                m_futur_mutex.lock();
+                while(m_futur_head)
+                {
+                    Task *current = m_futur_head;
+                    Task::Status operation = current->m_status;
+                    
+                    m_futur_head = m_futur_head->m_futur_next;
+                    current->m_status = Task::Status::available;
+                    current->m_futur_next = nullptr;
+                    
+                    m_futur_mutex.unlock();
+                    if(operation == Task::Status::to_add)
+                    {
+                        add(*current);
+                    }
+                    else if(operation == Task::Status::to_remove)
+                    {
+                        remove(*current);
+                    }
+                    m_futur_mutex.lock();
+                }
+                m_futur_mutex.unlock();
+            }
+            
+            while(head)
+            {
+                head->m_timer.callback();
+                head->m_status = Task::Status::available;
+                head = head->m_process_next;
+            }
+        }
+        
+        void Scheduler::List::add(Task& task)
+        {
+            if(task.m_status != Task::Status::inserted && m_main_mutex.try_lock())
+            {
+                task.m_status = Task::Status::inserted;
+                if(m_main_tail)
+                {
+                    m_main_tail->m_next = &task;
+                }
+                else
+                {
+                    m_main_head = &task;
+                }
+                m_main_tail = &task;
+            }
+            else
+            {
+                std::lock_guard<std::mutex> guard(m_futur_mutex);
+                task.m_status = Task::Status::to_add;
+                if(m_futur_tail)
+                {
+                    m_futur_tail->m_next = &task;
+                }
+                else
+                {
+                    m_futur_head = &task;
+                }
+                m_futur_tail = &task;
             }
         }
         
